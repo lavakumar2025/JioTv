@@ -1,0 +1,42 @@
+# .github/workflows/update-channels.yml
+name: Update channels.m3u Cookie Every 6 Hours
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours (00:00, 06:00, 12:00, 18:00 UTC)
+  workflow_dispatch:       # Manual trigger button
+
+jobs:
+  update-channels:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+        
+    - name: Update cookie in channels.m3u
+      env:
+        NEW_COOKIE: ${{ secrets.COOKIE_VALUE }}
+      run: |
+        python update_channels.py
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add channels.m3u
+        
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes detected - cookie might be the same"
+        else
+          git commit -m "🔄 Auto-update cookie in channels.m3u - $(date '+%Y-%m-%d %H:%M UTC')"
+          git push
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.COOKIE_TOKEN }}
