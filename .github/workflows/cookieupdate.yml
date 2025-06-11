@@ -152,26 +152,25 @@ jobs:
         PLAYLIST_FILE="filtered_channels.m3u"
         NEW_COOKIE=$(cat new_cookie.txt)
         
-        # Create backup
+        # Create a backup
         cp "$PLAYLIST_FILE" "${PLAYLIST_FILE}.backup"
         
-        # Count current entries
-        EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie' "$PLAYLIST_FILE" || echo "0")
-        URL_COUNT=$(grep -c 'hdnea__=' "$PLAYLIST_FILE" || echo "0")
+        # Escape special characters in the cookie for sed
+        # This handles /, &, and other special characters
+        ESCAPED_NEW_COOKIE=$(printf '%s\n' "$NEW_COOKIE" | sed 's/[[\.*^$()+?{|]/\\&/g')
         
-        echo "📊 Found $EXTHTTP_COUNT #EXTHTTP entries and $URL_COUNT URL entries to update"
-        
-        # Update #EXTHTTP lines
         echo "🔧 Updating #EXTHTTP cookie lines..."
-        sed -i 's/#EXTHTTP:{"cookie":"__hdnea__=[^"]*"}/#EXTHTTP:{"cookie":"__hdnea__='$NEW_COOKIE'"}/g' "$PLAYLIST_FILE"
+        # Use | as delimiter instead of / to avoid conflicts
+        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*\"}|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_NEW_COOKIE\"}|g" "$PLAYLIST_FILE"
         
         # Update URL parameters
         echo "🔧 Updating URL cookie parameters..."
-        sed -i 's/__hdnea__=[^&]*/__hdnea__='$NEW_COOKIE'/g' "$PLAYLIST_FILE"
+        # Use | as delimiter instead of / to avoid conflicts
+        sed -i "s|__hdnea__=[^&]*|__hdnea__=$ESCAPED_NEW_COOKIE|g" "$PLAYLIST_FILE"
         
         # Verify updates
-        NEW_EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*'$NEW_COOKIE "$PLAYLIST_FILE" || echo "0")
-        NEW_URL_COUNT=$(grep -c 'hdnea__='$NEW_COOKIE "$PLAYLIST_FILE" || echo "0")
+        NEW_EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*'"$NEW_COOKIE" "$PLAYLIST_FILE" || echo "0")
+        NEW_URL_COUNT=$(grep -c 'hdnea__='"$NEW_COOKIE" "$PLAYLIST_FILE" || echo "0")
         
         echo "✅ Updated $NEW_EXTHTTP_COUNT #EXTHTTP entries"
         echo "✅ Updated $NEW_URL_COUNT URL entries"
@@ -275,4 +274,4 @@ jobs:
           echo "🍪 Current cookie: ${CURRENT_COOKIE:0:50}..."
         fi
         
-        echo "✨ Cookie update workflow completed!"
+        echo "✨ Cookie update workflow completed!" 
