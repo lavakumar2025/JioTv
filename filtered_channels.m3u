@@ -1,7 +1,10 @@
 #EXTM3U
-#PLAYLIST:Filtered Channel Playlist by TVG-ID Numbers
-#DESCRIPTION:Auto-filtered playlist with specific TVG-ID numbers
 
+#DESCRIPTION:Auto-filtered playlist with specific TVG-ID numbers
+#EXTINF:-1 tvg-id="2352" group-title="Sports" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Sports18_2.png",Star Sports 2 Telugu
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
+#EXTHTTP:{"cookie":"hdnea=st=1749607442~exp=1749693842~acl=/*~hmac=2aa65a7e156d5dda9b3668670a0a1fb505d0e5b70b8d6e22a856c323926e1f3d"}
+https://jiotvmblive.cdn.jio.com/bpk-tv/StarSports_2_Tel_voot_MOB/output03/index.m3u8?__hdnea__=st=1749607442~exp=1749693842~acl=/*~hmac=2aa65a7e156d5dda9b3668670a0a1fb505d0e5b70b8d6e22a856c323926e1f3d&xxx=%7Ccookie=hdnea=st=1749607442~exp=1749693842~acl=/*~hmac=2aa65a7e156d5dda9b3668670a0a1fb505d0e5b70b8d6e22a856c323926e1f3d
 #EXTINF:-1 tvg-id="1111" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_Movies_HD.png",Star Maa Movies HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=6dff9a2c741754c1b75312c53bc83d92:b75a65f46065ee70de75a88fed692846
