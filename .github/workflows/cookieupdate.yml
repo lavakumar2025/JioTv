@@ -1,42 +1,278 @@
-# .github/workflows/update-channels.yml
-name: Update channels.m3u Cookie Every 6 Hours
+name: Update M3U Playlist Cookies
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours (00:00, 06:00, 12:00, 18:00 UTC)
-  workflow_dispatch:       # Manual trigger button
+    # Runs every 5 minutes to check for cookie updates
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  contents: write
+  actions: read
 
 jobs:
-  update-channels:
+  update-cookies:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
-    - name: Setup Python
-      uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
-        
-    - name: Update cookie in channels.m3u
-      env:
-        NEW_COOKIE: ${{ secrets.COOKIE_VALUE }}
+        token: ${{ secrets.PAT_TOKEN }}
+        fetch-depth: 1
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Download source M3U and extract latest cookie
       run: |
-        python update_channels.py
+        echo "=== EXTRACTING LATEST COOKIE FROM SOURCE ==="
         
-    - name: Commit and push changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action Bot"
-        git add channels.m3u
+        # Get the M3U source URL
+        M3U_SOURCE="${{ secrets.M3U_URL }}"
         
-        # Check if there are changes to commit
-        if git diff --staged --quiet; then
-          echo "No changes detected - cookie might be the same"
-        else
-          git commit -m "🔄 Auto-update cookie in channels.m3u - $(date '+%Y-%m-%d %H:%M UTC')"
-          git push
+        # Validate input
+        if [ -z "$M3U_SOURCE" ]; then
+          echo "❌ ERROR: M3U_URL secret is empty!"
+          exit 1
         fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.COOKIE_TOKEN }}
+        
+        echo "🔗 M3U Source: [HIDDEN]"
+        
+        # Download the source M3U playlist
+        echo "📥 Downloading source M3U playlist..."
+        if ! curl -s -L --connect-timeout 30 --max-time 60 "$M3U_SOURCE" > source_playlist.m3u; then
+          echo "❌ ERROR: Failed to download M3U playlist"
+          exit 1
+        fi
+        
+        # Check if download was successful
+        if [ ! -s source_playlist.m3u ]; then
+          echo "❌ ERROR: Downloaded M3U file is empty"
+          exit 1
+        fi
+        
+        TOTAL_LINES=$(wc -l < source_playlist.m3u)
+        echo "✅ Downloaded: $TOTAL_LINES lines"
+        
+        # Extract the first cookie found in the source
+        echo "🍪 Extracting cookie from source playlist..."
+        
+        # Look for cookie in #EXTHTTP lines
+        EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' source_playlist.m3u | sed 's/.*"cookie":"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "")
+        
+        # Look for cookie in URL parameters
+        URL_COOKIE=$(grep -m1 'hdnea__=' source_playlist.m3u | sed 's/.*__hdnea__=\([^&]*\).*/\1/' 2>/dev/null || echo "")
+        
+        # Use the first cookie found
+        NEW_COOKIE=""
+        if [ ! -z "$EXTHTTP_COOKIE" ]; then
+          NEW_COOKIE="$EXTHTTP_COOKIE"
+          echo "✅ Found cookie in #EXTHTTP: ${NEW_COOKIE:0:50}..."
+        elif [ ! -z "$URL_COOKIE" ]; then
+          NEW_COOKIE="$URL_COOKIE"
+          echo "✅ Found cookie in URL: ${NEW_COOKIE:0:50}..."
+        else
+          echo "❌ ERROR: No cookie found in source playlist!"
+          echo "🔍 Searching for any hdnea patterns..."
+          grep -n "hdnea" source_playlist.m3u | head -5
+          exit 1
+        fi
+        
+        # Save the new cookie to a file
+        echo "$NEW_COOKIE" > new_cookie.txt
+        echo "💾 New cookie saved: ${NEW_COOKIE:0:50}..."
+
+    - name: Check if playlist file exists and extract current cookie
+      id: check_playlist
+      run: |
+        PLAYLIST_FILE="filtered_channels.m3u"
+        
+        if [ ! -f "$PLAYLIST_FILE" ]; then
+          echo "❌ ERROR: $PLAYLIST_FILE not found!"
+          echo "📝 Please ensure the playlist file exists in the repository"
+          echo "has_playlist=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+        echo "✅ Found playlist file: $PLAYLIST_FILE"
+        echo "has_playlist=true" >> $GITHUB_OUTPUT
+        
+        # Extract current cookie from playlist
+        CURRENT_COOKIE=""
+        
+        # Try to get cookie from #EXTHTTP line
+        CURRENT_EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" | sed 's/.*"cookie":"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "")
+        
+        # Try to get cookie from URL
+        CURRENT_URL_COOKIE=$(grep -m1 'hdnea__=' "$PLAYLIST_FILE" | sed 's/.*__hdnea__=\([^&]*\).*/\1/' 2>/dev/null || echo "")
+        
+        if [ ! -z "$CURRENT_EXTHTTP_COOKIE" ]; then
+          CURRENT_COOKIE="$CURRENT_EXTHTTP_COOKIE"
+        elif [ ! -z "$CURRENT_URL_COOKIE" ]; then
+          CURRENT_COOKIE="$CURRENT_URL_COOKIE"
+        fi
+        
+        if [ ! -z "$CURRENT_COOKIE" ]; then
+          echo "📋 Current cookie: ${CURRENT_COOKIE:0:50}..."
+          echo "$CURRENT_COOKIE" > current_cookie.txt
+        else
+          echo "⚠️  No current cookie found in playlist"
+          echo "" > current_cookie.txt
+        fi
+
+    - name: Compare cookies and check for changes
+      id: compare_cookies
+      run: |
+        NEW_COOKIE=$(cat new_cookie.txt 2>/dev/null || echo "")
+        CURRENT_COOKIE=$(cat current_cookie.txt 2>/dev/null || echo "")
+        
+        if [ -z "$NEW_COOKIE" ]; then
+          echo "❌ ERROR: No new cookie available"
+          exit 1
+        fi
+        
+        if [ "$NEW_COOKIE" = "$CURRENT_COOKIE" ]; then
+          echo "✅ Cookie unchanged: ${NEW_COOKIE:0:50}..."
+          echo "needs_update=false" >> $GITHUB_OUTPUT
+        else
+          echo "🔄 Cookie change detected!"
+          echo "📋 Current: ${CURRENT_COOKIE:0:50}..."
+          echo "🆕 New:     ${NEW_COOKIE:0:50}..."
+          echo "needs_update=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Update cookies in playlist
+      if: steps.compare_cookies.outputs.needs_update == 'true'
+      run: |
+        echo "=== UPDATING COOKIES IN PLAYLIST ==="
+        
+        PLAYLIST_FILE="filtered_channels.m3u"
+        NEW_COOKIE=$(cat new_cookie.txt)
+        
+        # Create backup
+        cp "$PLAYLIST_FILE" "${PLAYLIST_FILE}.backup"
+        
+        # Count current entries
+        EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie' "$PLAYLIST_FILE" || echo "0")
+        URL_COUNT=$(grep -c 'hdnea__=' "$PLAYLIST_FILE" || echo "0")
+        
+        echo "📊 Found $EXTHTTP_COUNT #EXTHTTP entries and $URL_COUNT URL entries to update"
+        
+        # Update #EXTHTTP lines
+        echo "🔧 Updating #EXTHTTP cookie lines..."
+        sed -i 's/#EXTHTTP:{"cookie":"__hdnea__=[^"]*"}/#EXTHTTP:{"cookie":"__hdnea__='$NEW_COOKIE'"}/g' "$PLAYLIST_FILE"
+        
+        # Update URL parameters
+        echo "🔧 Updating URL cookie parameters..."
+        sed -i 's/__hdnea__=[^&]*/__hdnea__='$NEW_COOKIE'/g' "$PLAYLIST_FILE"
+        
+        # Verify updates
+        NEW_EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*'$NEW_COOKIE "$PLAYLIST_FILE" || echo "0")
+        NEW_URL_COUNT=$(grep -c 'hdnea__='$NEW_COOKIE "$PLAYLIST_FILE" || echo "0")
+        
+        echo "✅ Updated $NEW_EXTHTTP_COUNT #EXTHTTP entries"
+        echo "✅ Updated $NEW_URL_COUNT URL entries"
+        
+        # Show sample of updated content
+        echo "=== SAMPLE UPDATED CONTENT ==="
+        echo "📄 Sample #EXTHTTP line:"
+        grep -m1 '#EXTHTTP:.*cookie' "$PLAYLIST_FILE" || echo "None found"
+        echo ""
+        echo "📄 Sample URL with cookie:"
+        grep -m1 'hdnea__=' "$PLAYLIST_FILE" | head -c 120 || echo "None found"
+        echo "..."
+
+    - name: Validate updated playlist
+      if: steps.compare_cookies.outputs.needs_update == 'true'
+      run: |
+        echo "=== VALIDATING UPDATED PLAYLIST ==="
+        
+        PLAYLIST_FILE="filtered_channels.m3u"
+        
+        # Check if file is valid M3U
+        if ! head -1 "$PLAYLIST_FILE" | grep -q "#EXTM3U"; then
+          echo "❌ ERROR: File doesn't start with #EXTM3U"
+          exit 1
+        fi
+        
+        # Count channels
+        CHANNEL_COUNT=$(grep -c "^#EXTINF" "$PLAYLIST_FILE" || echo "0")
+        
+        # Count updated cookies
+        NEW_COOKIE=$(cat new_cookie.txt)
+        UPDATED_EXTHTTP=$(grep -c "hdnea__=$NEW_COOKIE" "$PLAYLIST_FILE" || echo "0")
+        
+        echo "✅ Playlist validation successful"
+        echo "📺 Channels: $CHANNEL_COUNT"
+        echo "🍪 Updated cookie entries: $UPDATED_EXTHTTP"
+        
+        # Check for any old cookies remaining
+        OLD_COOKIE_ENTRIES=$(grep -c "hdnea__=" "$PLAYLIST_FILE" || echo "0")
+        if [ $OLD_COOKIE_ENTRIES -ne $UPDATED_EXTHTTP ]; then
+          echo "⚠️  Warning: Some cookie entries might not have been updated"
+        fi
+
+    - name: Commit and push changes
+      if: steps.compare_cookies.outputs.needs_update == 'true'
+      run: |
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Add the updated file
+        git add filtered_channels.m3u
+        
+        # Create detailed commit message
+        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        NEW_COOKIE=$(cat new_cookie.txt)
+        CHANNEL_COUNT=$(grep -c "^#EXTINF" filtered_channels.m3u || echo "0")
+        UPDATED_ENTRIES=$(grep -c "hdnea__=$NEW_COOKIE" filtered_channels.m3u || echo "0")
+        
+        git commit -m "🍪 Auto-update M3U Playlist Cookies - $TIMESTAMP
+
+        🔄 Cookie Updated: ${NEW_COOKIE:0:50}...
+        📺 Channels: $CHANNEL_COUNT
+        🍪 Updated Entries: $UPDATED_ENTRIES
+        🤖 Updated by GitHub Actions
+        ⏰ Last update: $TIMESTAMP"
+        
+        # Push changes
+        git push
+        
+        echo "✅ Changes committed and pushed successfully"
+
+    - name: Cleanup
+      if: always()
+      run: |
+        # Remove temporary files
+        rm -f source_playlist.m3u
+        rm -f new_cookie.txt
+        rm -f current_cookie.txt
+        rm -f filtered_channels.m3u.backup
+        
+        echo "🧹 Cleanup completed"
+
+    - name: Workflow summary
+      if: always()
+      run: |
+        echo "=== COOKIE UPDATE WORKFLOW SUMMARY ==="
+        echo "🏁 Status: ${{ job.status }}"
+        echo "🔄 Cookie update needed: ${{ steps.compare_cookies.outputs.needs_update }}"
+        echo "⏰ Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+        
+        if [ -f filtered_channels.m3u ]; then
+          CHANNEL_COUNT=$(grep -c "^#EXTINF" filtered_channels.m3u || echo "0")
+          COOKIE_ENTRIES=$(grep -c "hdnea__=" filtered_channels.m3u || echo "0")
+          
+          echo "📺 Total channels: $CHANNEL_COUNT"
+          echo "🍪 Cookie entries: $COOKIE_ENTRIES"
+          
+          # Show current cookie info
+          CURRENT_COOKIE=$(grep -m1 'hdnea__=' filtered_channels.m3u | sed 's/.*__hdnea__=\([^&]*\).*/\1/' 2>/dev/null || echo "Not found")
+          echo "🍪 Current cookie: ${CURRENT_COOKIE:0:50}..."
+        fi
+        
+        echo "✨ Cookie update workflow completed!"
