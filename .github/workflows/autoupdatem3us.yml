@@ -341,13 +341,14 @@ jobs:
         NEW_COOKIE=$(cat new_cookie.txt)
         CURRENT_COUNT=$(find . -maxdepth 1 -name "*.m3u" -not -name "${{ env.SOURCE_PLAYLIST }}" | wc -l)
         
-        COMMIT_MSG="🤖 Auto-maintain ${{ env.TARGET_COUNT }} M3U Playlists - $TIMESTAMP
+        # Create commit message with proper YAML escaping
+        COMMIT_MSG="Auto-maintain ${{ env.TARGET_COUNT }} M3U Playlists - $TIMESTAMP
 
-🔄 Cookie: ${NEW_COOKIE:0:50}...
-📺 Playlist files: $CURRENT_COUNT
-🎯 Target maintained: ${{ env.TARGET_COUNT }}
-📝 Updated: ${{ env.NAMES_FILE }}
-⏰ Last update: $TIMESTAMP
+Cookie: ${NEW_COOKIE:0:50}...
+Playlist files: $CURRENT_COUNT
+Target maintained: ${{ env.TARGET_COUNT }}
+Updated: ${{ env.NAMES_FILE }}
+Last update: $TIMESTAMP
 
 Changes:
 - Updated cookies in all playlist files
@@ -356,7 +357,10 @@ Changes:
         
         git commit -m "$COMMIT_MSG"
         
-        git push
+        if ! git push; then
+          echo "❌ Failed to push changes"
+          exit 1
+        fi
         
         echo "✅ Changes committed and pushed successfully"
 
