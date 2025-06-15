@@ -2,9 +2,8 @@ name: Auto-Maintain 100 M3U Playlists with Cookie Updates
 
 on:
   schedule:
-    # Runs every 5 minutes to check for cookie updates and file count
     - cron: '*/5 * * * *'
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -42,36 +41,25 @@ jobs:
     - name: Download source M3U and extract latest cookie
       run: |
         echo "=== EXTRACTING LATEST COOKIE FROM SOURCE ==="
-        
         M3U_SOURCE="${{ secrets.M3U_URL }}"
-        
         if [ -z "$M3U_SOURCE" ]; then
           echo "❌ ERROR: M3U_URL secret is empty!"
           exit 1
         fi
-        
-        echo "🔗 M3U Source: [HIDDEN]"
-        
         echo "📥 Downloading source M3U playlist..."
         if ! curl -s -L --connect-timeout 30 --max-time 60 "$M3U_SOURCE" > source_playlist.m3u; then
           echo "❌ ERROR: Failed to download M3U playlist"
           exit 1
         fi
-        
         if [ ! -s source_playlist.m3u ]; then
           echo "❌ ERROR: Downloaded M3U file is empty"
           exit 1
         fi
-        
         TOTAL_LINES=$(wc -l < source_playlist.m3u)
         echo "✅ Downloaded: $TOTAL_LINES lines"
-        
         echo "🍪 Extracting cookie from source playlist..."
-        
         EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' source_playlist.m3u | sed 's/.*"cookie":"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "")
-        
         URL_COOKIE=$(grep -m1 'hdnea__=' source_playlist.m3u | sed 's/.*__hdnea__=\([^&]*\).*/\1/' 2>/dev/null || echo "")
-        
         NEW_COOKIE=""
         if [ ! -z "$EXTHTTP_COOKIE" ]; then
           NEW_COOKIE="$EXTHTTP_COOKIE"
@@ -81,11 +69,8 @@ jobs:
           echo "✅ Found cookie in URL: ${NEW_COOKIE:0:50}..."
         else
           echo "❌ ERROR: No cookie found in source playlist!"
-          echo "🔍 Searching for any hdnea patterns..."
-          grep -n "hdnea" source_playlist.m3u | head -5
           exit 1
         fi
-        
         echo "$NEW_COOKIE" > new_cookie.txt
         echo "💾 New cookie saved: ${NEW_COOKIE:0:50}..."
 
@@ -93,17 +78,12 @@ jobs:
       id: check_files
       run: |
         echo "=== CHECKING CURRENT PLAYLIST FILES ==="
-        
         EXISTING_FILES=($(find . -maxdepth 1 -name "*.m3u" -not -name "${{ env.SOURCE_PLAYLIST }}" | sort))
         CURRENT_COUNT=${#EXISTING_FILES[@]}
-        
         echo "📊 Current playlist count: $CURRENT_COUNT"
         echo "🎯 Target count: ${{ env.TARGET_COUNT }}"
-        
         printf '%s\n' "${EXISTING_FILES[@]}" > current_files.txt
-        
         NEEDED=$((${{ env.TARGET_COUNT }} - CURRENT_COUNT))
-        
         if [ $NEEDED -gt 0 ]; then
           echo "➕ Need to create $NEEDED new files"
           echo "needs_creation=true" >> $GITHUB_OUTPUT
@@ -116,20 +96,16 @@ jobs:
           echo "✅ Perfect! Already have ${{ env.TARGET_COUNT }} files"
           echo "needs_creation=false" >> $GITHUB_OUTPUT
         fi
-        
         echo "current_count=$CURRENT_COUNT" >> $GITHUB_OUTPUT
 
     - name: Generate random filenames for missing files
       if: steps.check_files.outputs.needs_creation == 'true'
       run: |
         echo "=== GENERATING NEW RANDOM FILENAMES ==="
-        
         NEEDED=${{ steps.check_files.outputs.files_needed }}
-        
         generate_random_name() {
           cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1
         }
-        
         EXISTING_NAMES=()
         if [ -f current_files.txt ]; then
           while IFS= read -r file; do
@@ -137,7 +113,6 @@ jobs:
             EXISTING_NAMES+=("$basename_file")
           done < current_files.txt
         fi
-        
         NEW_NAMES=()
         for ((i=1; i<=NEEDED; i++)); do
           while true; do
@@ -149,7 +124,6 @@ jobs:
             fi
           done
         done
-        
         printf '%s\n' "${NEW_NAMES[@]}" > new_names.txt
         echo "✅ Generated $NEEDED new filenames"
 
@@ -157,9 +131,7 @@ jobs:
       if: steps.check_files.outputs.needs_creation == 'true'
       run: |
         echo "=== CREATING MISSING PLAYLIST FILES ==="
-        
         SOURCE_CONTENT=$(cat "${{ env.SOURCE_PLAYLIST }}")
-        
         while IFS= read -r name; do
           if [ ! -z "$name" ]; then
             NEW_FILE="${name}.m3u"
@@ -167,30 +139,23 @@ jobs:
             echo "✅ Created: $NEW_FILE"
           fi
         done < new_names.txt
-        
         echo "🎉 All missing files created successfully!"
 
     - name: Get current cookie from existing files
       id: current_cookie
       run: |
         echo "=== EXTRACTING CURRENT COOKIE FROM EXISTING FILES ==="
-        
         SAMPLE_FILE=$(find . -maxdepth 1 -name "*.m3u" -not -name "${{ env.SOURCE_PLAYLIST }}" | head -1)
-        
         if [ ! -z "$SAMPLE_FILE" ] && [ -f "$SAMPLE_FILE" ]; then
           echo "📋 Checking cookie in: $SAMPLE_FILE"
-          
           CURRENT_EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' "$SAMPLE_FILE" | sed 's/.*"cookie":"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "")
-          
           CURRENT_URL_COOKIE=$(grep -m1 'hdnea__=' "$SAMPLE_FILE" | sed 's/.*__hdnea__=\([^&]*\).*/\1/' 2>/dev/null || echo "")
-          
           CURRENT_COOKIE=""
           if [ ! -z "$CURRENT_EXTHTTP_COOKIE" ]; then
             CURRENT_COOKIE="$CURRENT_EXTHTTP_COOKIE"
           elif [ ! -z "$CURRENT_URL_COOKIE" ]; then
             CURRENT_COOKIE="$CURRENT_URL_COOKIE"
           fi
-          
           if [ ! -z "$CURRENT_COOKIE" ]; then
             echo "📋 Current cookie: ${CURRENT_COOKIE:0:50}..."
             echo "$CURRENT_COOKIE" > current_cookie.txt
@@ -208,12 +173,10 @@ jobs:
       run: |
         NEW_COOKIE=$(cat new_cookie.txt 2>/dev/null || echo "")
         CURRENT_COOKIE=$(cat current_cookie.txt 2>/dev/null || echo "")
-        
         if [ -z "$NEW_COOKIE" ]; then
           echo "❌ ERROR: No new cookie available"
           exit 1
         fi
-        
         if [ "$NEW_COOKIE" = "$CURRENT_COOKIE" ] && [ ! -z "$CURRENT_COOKIE" ]; then
           echo "✅ Cookie unchanged: ${NEW_COOKIE:0:50}..."
           echo "needs_update=false" >> $GITHUB_OUTPUT
@@ -228,51 +191,37 @@ jobs:
       if: steps.compare_cookies.outputs.needs_update == 'true' || steps.check_files.outputs.needs_creation == 'true'
       run: |
         echo "=== UPDATING COOKIES IN ALL PLAYLIST FILES ==="
-        
         NEW_COOKIE=$(cat new_cookie.txt)
-        
         PLAYLIST_FILES=($(find . -maxdepth 1 -name "*.m3u" -not -name "${{ env.SOURCE_PLAYLIST }}"))
-        
         echo "🔧 Updating cookies in ${#PLAYLIST_FILES[@]} files..."
-        
         ESCAPED_NEW_COOKIE=$(printf '%s\n' "$NEW_COOKIE" | sed 's/[[\.*^$()+?{|]/\\&/g')
-        
         UPDATED_COUNT=0
         for file in "${PLAYLIST_FILES[@]}"; do
           if [ -f "$file" ]; then
             cp "$file" "${file}.backup"
-            
             sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*\"}|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_NEW_COOKIE\"}|g" "$file"
-            
             sed -i "s|__hdnea__=[^&]*|__hdnea__=$ESCAPED_NEW_COOKIE|g" "$file"
-            
             UPDATED_COUNT=$((UPDATED_COUNT + 1))
             echo "✅ Updated: $(basename "$file")"
           fi
         done
-        
         echo "🎉 Successfully updated cookies in $UPDATED_COUNT files"
 
     - name: Update get.txt with all current filenames
       run: |
         echo "=== UPDATING GET.TXT WITH ALL FILENAMES ==="
-        
         PLAYLIST_FILES=($(find . -maxdepth 1 -name "*.m3u" -not -name "${{ env.SOURCE_PLAYLIST }}" | sort))
-        
         {
           echo "# Generated playlist files (Total: ${#PLAYLIST_FILES[@]})"
           echo "# Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
           echo "# Target count: ${{ env.TARGET_COUNT }}"
           echo "# Current cookie: $(cat new_cookie.txt | head -c 50)..."
           echo ""
-          
           for file in "${PLAYLIST_FILES[@]}"; do
             basename "$file"
           done
         } > "${{ env.NAMES_FILE }}"
-        
         echo "📝 Updated ${{ env.NAMES_FILE }} with ${#PLAYLIST_FILES[@]} filenames"
-        
         ACTUAL_COUNT=${#PLAYLIST_FILES[@]}
         if [ $ACTUAL_COUNT -eq ${{ env.TARGET_COUNT }} ]; then
           echo "✅ Perfect! Exactly ${{ env.TARGET_COUNT }} files maintained"
@@ -283,11 +232,9 @@ jobs:
     - name: Validate all playlist files
       run: |
         echo "=== VALIDATING ALL PLAYLIST FILES ==="
-        
         PLAYLIST_FILES=($(find . -maxdepth 1 -name "*.m3u" -not -name "${{ env.SOURCE_PLAYLIST }}"))
         VALID_COUNT=0
         INVALID_FILES=()
-        
         for file in "${PLAYLIST_FILES[@]}"; do
           if [ -f "$file" ]; then
             if head -1 "$file" | grep -q "#EXTM3U"; then
@@ -297,18 +244,14 @@ jobs:
             fi
           fi
         done
-        
         echo "✅ Valid playlist files: $VALID_COUNT"
-        
         if [ ${#INVALID_FILES[@]} -gt 0 ]; then
           echo "❌ Invalid files found:"
           printf '%s\n' "${INVALID_FILES[@]}"
           exit 1
         fi
-        
         NEW_COOKIE=$(cat new_cookie.txt)
         COOKIE_CONSISTENT=true
-        
         for file in "${PLAYLIST_FILES[@]}"; do
           if [ -f "$file" ]; then
             if ! grep -q "hdnea__=$NEW_COOKIE" "$file"; then
@@ -317,7 +260,6 @@ jobs:
             fi
           fi
         done
-        
         if [ "$COOKIE_CONSISTENT" = true ]; then
           echo "✅ All files have consistent cookies"
         else
@@ -329,39 +271,28 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        
         git add *.m3u "${{ env.NAMES_FILE }}"
-        
         if git diff --staged --quiet; then
           echo "ℹ️  No changes to commit"
           exit 0
         fi
-        
         TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
         NEW_COOKIE=$(cat new_cookie.txt)
         CURRENT_COUNT=$(find . -maxdepth 1 -name "*.m3u" -not -name "${{ env.SOURCE_PLAYLIST }}" | wc -l)
-        
-        # Create commit message with proper YAML escaping
-        COMMIT_MSG="Auto-maintain ${{ env.TARGET_COUNT }} M3U Playlists - $TIMESTAMP
+        COMMIT_MSG="🤖 Auto-maintain ${{ env.TARGET_COUNT }} M3U Playlists - $TIMESTAMP
 
-Cookie: ${NEW_COOKIE:0:50}...
-Playlist files: $CURRENT_COUNT
-Target maintained: ${{ env.TARGET_COUNT }}
-Updated: ${{ env.NAMES_FILE }}
-Last update: $TIMESTAMP
+🔄 Cookie: ${NEW_COOKIE:0:50}...
+📺 Playlist files: $CURRENT_COUNT
+🎯 Target maintained: ${{ env.TARGET_COUNT }}
+📝 Updated: ${{ env.NAMES_FILE }}
+⏰ Last update: $TIMESTAMP
 
 Changes:
 - Updated cookies in all playlist files
 - Maintained exactly ${{ env.TARGET_COUNT }} playlist files
 - Updated filename list in ${{ env.NAMES_FILE }}"
-        
         git commit -m "$COMMIT_MSG"
-        
-        if ! git push; then
-          echo "❌ Failed to push changes"
-          exit 1
-        fi
-        
+        git push
         echo "✅ Changes committed and pushed successfully"
 
     - name: Cleanup temporary files
@@ -373,7 +304,6 @@ Changes:
         rm -f current_files.txt
         rm -f new_names.txt
         rm -f *.backup
-        
         echo "🧹 Cleanup completed"
 
     - name: Workflow summary
@@ -382,21 +312,17 @@ Changes:
         echo "=== PLAYLIST MAINTENANCE WORKFLOW SUMMARY ==="
         echo "🏁 Status: ${{ job.status }}"
         echo "⏰ Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-        
         CURRENT_COUNT=$(find . -maxdepth 1 -name "*.m3u" -not -name "${{ env.SOURCE_PLAYLIST }}" | wc -l)
         echo "📊 Current playlist count: $CURRENT_COUNT"
         echo "🎯 Target count: ${{ env.TARGET_COUNT }}"
-        
         if [ $CURRENT_COUNT -eq ${{ env.TARGET_COUNT }} ]; then
           echo "✅ SUCCESS: Exactly ${{ env.TARGET_COUNT }} files maintained"
         else
           echo "⚠️  WARNING: Expected ${{ env.TARGET_COUNT }}, found $CURRENT_COUNT"
         fi
-        
         if [ -f new_cookie.txt ]; then
           CURRENT_COOKIE=$(cat new_cookie.txt)
           echo "🍪 Current cookie: ${CURRENT_COOKIE:0:50}..."
         fi
-        
         echo "📝 All filenames listed in: ${{ env.NAMES_FILE }}"
         echo "✨ Playlist maintenance workflow completed!"
