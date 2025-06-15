@@ -295,16 +295,7 @@ Changes:
         git push
         echo "✅ Changes committed and pushed successfully"
 
-    - name: Cleanup temporary files
-      if: always()
-      run: |
-        rm -f source_playlist.m3u
-        rm -f new_cookie.txt
-        rm -f current_cookie.txt
-        rm -f current_files.txt
-        rm -f new_names.txt
-        rm -f *.backup
-        echo "🧹 Cleanup completed"
+  
 
     - name: Workflow summary
       if: always()
