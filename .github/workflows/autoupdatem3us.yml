@@ -114,7 +114,7 @@ jobs:
         printf '%s\n' "${EXISTING_FILES[@]}" > current_files.txt
         
         # Calculate how many files we need to create
-        NEEDED=$((TARGET_COUNT - CURRENT_COUNT))
+        NEEDED=$((${{ env.TARGET_COUNT }} - CURRENT_COUNT))
         
         if [ $NEEDED -gt 0 ]; then
           echo "➕ Need to create $NEEDED new files"
