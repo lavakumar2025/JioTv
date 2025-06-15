@@ -159,6 +159,11 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/ETV_Cinema_BTS/output/index.mpd?%7Ccookie
 #EXTHTTP:{"cookie":"__hdnea__=st=1749953964~exp=1750040364~acl=/*~hmac=f20cbc0beae432e679f9c2065f7a3358004700502b6deea518f5d57dbe0d70a0
 https://jiotvmblive.cdn.jio.com/bpk-tv/ETV_Abhiruchi_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1749953964~exp=1750040364~acl=/*~hmac=f20cbc0beae432e679f9c2065f7a3358004700502b6deea518f5d57dbe0d70a0
 
+#EXTINF:-1 tvg-id="" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeetelugu/app_cover/1920x1080appbanner0d53261e16dc413eb7f558be744b8c2e.jpg" group-title="Entertainment", Zee Telugu HD
+https://live.drmlive-02.workers.dev/zee/zeetelugu.m3u8
+
+#EXTINF:-1 tvg-id="" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeecinemalu/app_cover/1920x1080appcoverae8446a12eb44e9595de69615c82d0f4.jpg" group-title="Entertainment", Zee Cinemalu HD
+https://live.drmlive-02.workers.dev/zee/zeecinemalu.m3u8
 
 #EXTINF:-1 tvg-id="629" group-title="Entertainment" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Telugu.png",ETV Telugu
 #KODIPROP:inputstream.adaptive.license_type=clearkey
