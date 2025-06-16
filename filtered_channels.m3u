@@ -26,7 +26,7 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_HD_BTS/output/index.mpd?%7Ccookie=__h
 #EXTHTTP:{"cookie":"__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_Music_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 
-#EXTINF:-1 tvg-id="" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_Movies.png",Star Maa Movies 
+#EXTINF:-1 tvg-id="4001" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_Movies.png",Star Maa Movies 
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=6dff9a2c741754c1b75312c53bc83d92:b75a65f46065ee70de75a88fed692846
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
@@ -34,7 +34,7 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_Music_BTS/output/index.mpd?%7Ccookie=
 https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_Movies_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 
 
-#EXTINF:-1 tvg-id="" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_Gold.png",Star Maa Gold
+#EXTINF:-1 tvg-id="4002" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_Gold.png",Star Maa Gold
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=516d26778a21587484208637d89ff773:77599313595e70e5903151b0592ffa15
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
@@ -42,7 +42,7 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_Movies_BTS/output/index.mpd?%7Ccookie
 https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_Gold_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 
 
-#EXTINF:-1 tvg-id="" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Maa.png",Star Maa
+#EXTINF:-1 tvg-id="4003" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Maa.png",Star Maa
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=6744a252854352acbfe40413a14fca0f:1de605f98df36a7417eff631e1a0966a
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
@@ -50,7 +50,7 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_Gold_BTS/output/index.mpd?%7Ccookie=_
 https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Maa_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 
 
-#EXTINF:-1 tvg-id="" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Sports_1_Telugu.png",Star Sports 1 Telugu
+#EXTINF:-1 tvg-id="4004" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Sports_1_Telugu.png",Star Sports 1 Telugu
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=200a6dd89c6b5a48b9991d8ab57fc7d2:1f62834669a97e92ea1f3263274853fc
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
@@ -58,7 +58,7 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Maa_BTS/output/index.mpd?%7Ccookie=_
 https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 
 
-#EXTINF:-1 tvg-id="" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Sports_1_Telugu_HD.png",Star Sports 1 Telugu HD
+#EXTINF:-1 tvg-id="4005" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Sports_1_Telugu_HD.png",Star Sports 1 Telugu HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=49e84b9edfd85379b90c81b7d2d3d2bf:19c82d3ff094fa06af95820a1572ecb5
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
@@ -66,7 +66,7 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_BTS/output/index.mpd
 https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 
 
-#EXTINF:-1 tvg-id="" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Sports18_2.png",Star Sports 2 Telugu
+#EXTINF:-1 tvg-id="4006" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Sports18_2.png",Star Sports 2 Telugu
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=e38f46718d9d5c40af83095f176ba41e:8836ee0f7377d71c156a139361a45be5
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
@@ -74,7 +74,7 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.
 https://jiotvmblive.cdn.jio.com/bpk-tv/Sports18_2_MOB/WDVCatchup/index.mpd?%7Ccookie=__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 
 
-#EXTINF:-1 tvg-id="" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Sports2_Telugu_HD.png",Star Sports 2 Telugu HD
+#EXTINF:-1 tvg-id="4007" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Sports2_Telugu_HD.png",Star Sports 2 Telugu HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=c8a2fb190fc957c1b8333af9a7a39d31:be7497b59d4ce9e33d29bfd1d38bad1d
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
@@ -159,10 +159,10 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/ETV_Cinema_BTS/output/index.mpd?%7Ccookie
 #EXTHTTP:{"cookie":"__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 https://jiotvmblive.cdn.jio.com/bpk-tv/ETV_Abhiruchi_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750072913~exp=1750159313~acl=/*~hmac=782826f2e531a01a1d24cf76b415e24a2f2474c198a4e9cb6c45d2fb021a3d48
 
-#EXTINF:-1 tvg-id="" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeetelugu/app_cover/1920x1080appbanner0d53261e16dc413eb7f558be744b8c2e.jpg" group-title="Entertainment", Zee Telugu HD
+#EXTINF:-1 tvg-id="4008" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeetelugu/app_cover/1920x1080appbanner0d53261e16dc413eb7f558be744b8c2e.jpg" group-title="Entertainment", Zee Telugu HD
 https://live.drmlive-02.workers.dev/zee/zeetelugu.m3u8
 
-#EXTINF:-1 tvg-id="" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeecinemalu/app_cover/1920x1080appcoverae8446a12eb44e9595de69615c82d0f4.jpg" group-title="Entertainment", Zee Cinemalu HD
+#EXTINF:-1 tvg-id="4009" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeecinemalu/app_cover/1920x1080appcoverae8446a12eb44e9595de69615c82d0f4.jpg" group-title="Entertainment", Zee Cinemalu HD
 https://live.drmlive-02.workers.dev/zee/zeecinemalu.m3u8
 
 #EXTINF:-1 tvg-id="629" group-title="Entertainment" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Telugu.png",ETV Telugu
