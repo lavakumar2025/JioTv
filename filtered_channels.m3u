@@ -104,6 +104,19 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Movies_Select_HD_BTS/output/index.mp
 #EXTHTTP:{"cookie":"__hdnea__=st=1750125870~exp=1750212270~acl=/*~hmac=9aadfc1db989ad8891abe475ca49630523d30a85753a5926421e59f725a504d9
 https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_1_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750125870~exp=1750212270~acl=/*~hmac=9aadfc1db989ad8891abe475ca49630523d30a85753a5926421e59f725a504d9
 
+#EXTINF:-1 tvg-id="4010" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Sports_HD1.png",Star Sports 1 HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=965dc2ddb1d85138ad787999a7f30ca5:859695076e67fe961836b564db6d689c
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
+#EXTHTTP:{"cookie":"__hdnea__=st=1750125870~exp=1750212270~acl=/*~hmac=9aadfc1db989ad8891abe475ca49630523d30a85753a5926421e59f725a504d9
+https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_HD1_BTS/output/index.mpd?__hdnea__=st=1750125870~exp=1750212270~acl=/*~hmac=9aadfc1db989ad8891abe475ca49630523d30a85753a5926421e59f725a504d9
+
+#EXTINF:-1 tvg-id="4011" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_SportsHD2.png",Star Sports 2 HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=9457eb90129456fa8ea95e10ba4ac51e:e620a970cea474c491ac78ae71a4d764
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
+#EXTHTTP:{"cookie":"__hdnea__=st=1750125870~exp=1750212270~acl=/*~hmac=9aadfc1db989ad8891abe475ca49630523d30a85753a5926421e59f725a504d9
+https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_HD2_BTS/output/index.mpd?__hdnea__=st=1750125870~exp=1750212270~acl=/*~hmac=9aadfc1db989ad8891abe475ca49630523d30a85753a5926421e59f725a504d9
 
 #EXTINF:-1 tvg-id="1141" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Sports_2.png",Star Sports 2
 #KODIPROP:inputstream.adaptive.license_type=clearkey
