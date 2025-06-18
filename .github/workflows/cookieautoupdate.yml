@@ -60,16 +60,22 @@ jobs:
         # Extract cookie from source
         echo "🍪 Extracting cookie from source playlist..."
         
-        # Look for cookie in #EXTHTTP lines
-        EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' source_playlist.m3u | sed 's/.*"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "")
+        # Look for cookie in #EXTHTTP lines - improved extraction
+        EXTHTTP_COOKIE=""
         
-        # If above fails, try extracting from malformed JSON
+        # Method 1: Extract from properly formatted JSON
+        EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' source_playlist.m3u | sed -n 's/.*"__hdnea__=\([^"]*\)".*/\1/p' 2>/dev/null || echo "")
+        
+        # Method 2: Extract from malformed JSON (missing closing quotes/braces)
         if [ -z "$EXTHTTP_COOKIE" ]; then
-          EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*__hdnea__' source_playlist.m3u | sed 's/.*__hdnea__=\([^"}]*\).*/\1/' 2>/dev/null || echo "")
+          EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*__hdnea__' source_playlist.m3u | sed -n 's/.*__hdnea__=\([^"}\s]*\).*/\1/p' 2>/dev/null || echo "")
         fi
         
-        # Look for cookie in URL parameters as fallback
-        URL_COOKIE=$(grep -m1 'hdnea__=' source_playlist.m3u | sed 's/.*__hdnea__=\([^&]*\).*/\1/' 2>/dev/null || echo "")
+        # Method 3: Look for cookie in URL parameters as fallback
+        URL_COOKIE=""
+        if [ -z "$EXTHTTP_COOKIE" ]; then
+          URL_COOKIE=$(grep -m1 'hdnea__=' source_playlist.m3u | sed -n 's/.*__hdnea__=\([^&\s]*\).*/\1/p' 2>/dev/null || echo "")
+        fi
         
         # Use the first cookie found
         RAW_COOKIE=""
@@ -86,39 +92,44 @@ jobs:
           exit 1
         fi
         
-        # Fix cookie format - add "} if it doesn't end with "}
-        echo "🔧 Checking cookie format..."
-        if [[ "$RAW_COOKIE" == *'"}'* ]]; then
-          FIXED_COOKIE="$RAW_COOKIE"
-          echo "✅ Cookie already properly formatted: ${FIXED_COOKIE:0:50}..."
-        else
-          FIXED_COOKIE="${RAW_COOKIE}\"}"
-          echo "🔧 Fixed cookie format by adding closing: ${FIXED_COOKIE:0:50}..."
-        fi
+        # Clean and format cookie properly
+        echo "🔧 Processing cookie format..."
         
-        # Save the fixed cookie
-        echo "$FIXED_COOKIE" > new_cookie.txt
-        echo "💾 Cookie saved: ${FIXED_COOKIE:0:50}..."
+        # Remove any existing closing quotes/braces from the end
+        CLEAN_COOKIE=$(echo "$RAW_COOKIE" | sed 's/["}]*$//')
+        
+        # Add proper closing for JSON format
+        FORMATTED_COOKIE_JSON="${CLEAN_COOKIE}\"}"
+        
+        # Save both formats
+        echo "$CLEAN_COOKIE" > cookie_value.txt
+        echo "$FORMATTED_COOKIE_JSON" > cookie_json.txt
+        
+        echo "💾 Cookie value: ${CLEAN_COOKIE:0:50}..."
+        echo "💾 Cookie JSON: ${FORMATTED_COOKIE_JSON:0:50}..."
 
     - name: Check for existing playlist and compare cookies
       id: check_changes
       run: |
         PLAYLIST_FILE="playlist.m3u"
-        NEW_COOKIE=$(cat new_cookie.txt)
+        NEW_COOKIE_VALUE=$(cat cookie_value.txt)
         
         if [ -f "$PLAYLIST_FILE" ]; then
           echo "📄 Found existing playlist.m3u"
           
-          # Extract current cookie from existing playlist
-          CURRENT_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" | sed 's/.*"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "")
+          # Extract current cookie from existing playlist (just the value part)
+          CURRENT_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" | sed -n 's/.*"__hdnea__=\([^"]*\)".*/\1/p' 2>/dev/null || echo "")
           
-          if [ "$NEW_COOKIE" = "$CURRENT_COOKIE" ]; then
-            echo "✅ Cookie unchanged: ${NEW_COOKIE:0:50}..."
+          # Remove any trailing quotes/braces for comparison
+          CURRENT_COOKIE_CLEAN=$(echo "$CURRENT_COOKIE" | sed 's/["}]*$//')
+          
+          if [ "$NEW_COOKIE_VALUE" = "$CURRENT_COOKIE_CLEAN" ]; then
+            echo "✅ Cookie unchanged: ${NEW_COOKIE_VALUE:0:50}..."
             echo "needs_update=false" >> $GITHUB_OUTPUT
           else
             echo "🔄 Cookie change detected!"
-            echo "📋 Current: ${CURRENT_COOKIE:0:50}..."
-            echo "🆕 New:     ${NEW_COOKIE:0:50}..."
+            echo "📋 Current: ${CURRENT_COOKIE_CLEAN:0:50}..."
+            echo "🆕 New:     ${NEW_COOKIE_VALUE:0:50}..."
             echo "needs_update=true" >> $GITHUB_OUTPUT
           fi
         else
@@ -132,7 +143,8 @@ jobs:
         echo "=== CREATING/UPDATING PLAYLIST.M3U ==="
         
         PLAYLIST_FILE="playlist.m3u"
-        NEW_COOKIE=$(cat new_cookie.txt)
+        COOKIE_VALUE=$(cat cookie_value.txt)
+        COOKIE_JSON=$(cat cookie_json.txt)
         
         # Create backup if file exists
         if [ -f "$PLAYLIST_FILE" ]; then
@@ -144,23 +156,38 @@ jobs:
         cp source_playlist.m3u "$PLAYLIST_FILE"
         echo "📄 Created base playlist from source"
         
-        # Escape special characters in the cookie for sed
-        ESCAPED_NEW_COOKIE=$(printf '%s\n' "$NEW_COOKIE" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        # Debug: Show what we're working with
+        echo "🔍 Debug info:"
+        echo "   Cookie value: ${COOKIE_VALUE:0:50}..."
+        echo "   Cookie JSON:  ${COOKIE_JSON:0:50}..."
+        
+        # Show sample original #EXTHTTP line
+        echo "📄 Original #EXTHTTP sample:"
+        grep -m1 '#EXTHTTP' "$PLAYLIST_FILE" || echo "None found"
+        
+        # Escape special characters for sed
+        ESCAPED_COOKIE_JSON=$(printf '%s\n' "$COOKIE_JSON" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        ESCAPED_COOKIE_VALUE=$(printf '%s\n' "$COOKIE_VALUE" | sed 's/[[\.*^$()+?{|]/\\&/g')
         
         echo "🔧 Updating #EXTHTTP cookie lines..."
-        # Update #EXTHTTP lines with proper JSON format
-        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*\"}|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_NEW_COOKIE\"}|g" "$PLAYLIST_FILE"
         
-        # Also handle malformed #EXTHTTP lines and fix them
-        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_NEW_COOKIE\"}|g" "$PLAYLIST_FILE"
+        # Update #EXTHTTP lines - handle multiple patterns
+        # Pattern 1: Properly formatted JSON
+        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*\"}|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_COOKIE_JSON\"}|g" "$PLAYLIST_FILE"
+        
+        # Pattern 2: Malformed JSON missing closing quotes/braces
+        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_COOKIE_JSON\"}|g" "$PLAYLIST_FILE"
+        
+        # Pattern 3: Any other #EXTHTTP pattern with hdnea
+        sed -i "s|#EXTHTTP:.*__hdnea__=[^}\"]*[}\"]*|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_COOKIE_JSON\"}|g" "$PLAYLIST_FILE"
         
         echo "🔧 Updating URL cookie parameters..."
-        # Extract just the cookie value without "} for URL parameters
-        COOKIE_VALUE_ONLY=$(echo "$NEW_COOKIE" | sed 's/"}$//')
-        ESCAPED_COOKIE_VALUE=$(printf '%s\n' "$COOKIE_VALUE_ONLY" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        # Update URL parameters (these don't need the "} ending)
+        sed -i "s|__hdnea__=[^&\s]*|__hdnea__=$ESCAPED_COOKIE_VALUE|g" "$PLAYLIST_FILE"
         
-        # Update URL parameters
-        sed -i "s|__hdnea__=[^&]*|__hdnea__=$ESCAPED_COOKIE_VALUE|g" "$PLAYLIST_FILE"
+        # Show sample updated #EXTHTTP line
+        echo "📄 Updated #EXTHTTP sample:"
+        grep -m1 '#EXTHTTP' "$PLAYLIST_FILE" || echo "None found"
         
         # Count updates
         EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" || echo "0")
@@ -171,14 +198,17 @@ jobs:
         echo "✅ Updated $URL_COUNT URL entries"
         echo "📺 Total channels: $CHANNEL_COUNT"
         
-        # Show sample of updated content
-        echo "=== SAMPLE UPDATED CONTENT ==="
-        echo "📄 Sample #EXTHTTP line:"
-        grep -m1 '#EXTHTTP:.*cookie' "$PLAYLIST_FILE" || echo "None found"
-        echo ""
-        echo "📄 Sample URL with cookie:"
-        grep -m1 'hdnea__=' "$PLAYLIST_FILE" | head -c 120 || echo "None found"
-        echo "..."
+        # Verify the format is correct
+        echo "🔍 Verifying #EXTHTTP format..."
+        PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' "$PLAYLIST_FILE" | wc -l || echo "0")
+        TOTAL_EXTHTTP=$(grep '#EXTHTTP:' "$PLAYLIST_FILE" | wc -l || echo "0")
+        echo "✅ Properly formatted #EXTHTTP lines: $PROPERLY_FORMATTED/$TOTAL_EXTHTTP"
+        
+        if [ "$PROPERLY_FORMATTED" -lt "$TOTAL_EXTHTTP" ]; then
+          echo "⚠️  Some #EXTHTTP lines may not be properly formatted"
+          echo "📄 Sample #EXTHTTP lines:"
+          grep '#EXTHTTP:' "$PLAYLIST_FILE" | head -3
+        fi
 
     - name: Validate created playlist
       if: steps.check_changes.outputs.needs_update == 'true'
@@ -205,7 +235,14 @@ jobs:
         
         # Check cookie format in #EXTHTTP lines
         PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' "$PLAYLIST_FILE" | wc -l || echo "0")
+        MALFORMED=$(grep '#EXTHTTP:.*__hdnea__' "$PLAYLIST_FILE" | grep -v '"}' | wc -l || echo "0")
+        
         echo "✅ Properly formatted #EXTHTTP lines: $PROPERLY_FORMATTED"
+        if [ "$MALFORMED" -gt 0 ]; then
+          echo "⚠️  Malformed #EXTHTTP lines: $MALFORMED"
+          echo "📄 Examples of malformed lines:"
+          grep '#EXTHTTP:.*__hdnea__' "$PLAYLIST_FILE" | grep -v '"}' | head -2
+        fi
 
     - name: Commit and push changes
       if: steps.check_changes.outputs.needs_update == 'true'
@@ -219,15 +256,16 @@ jobs:
         
         # Create detailed commit message
         TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-        NEW_COOKIE=$(cat new_cookie.txt)
+        NEW_COOKIE=$(cat cookie_value.txt)
         CHANNEL_COUNT=$(grep -c "^#EXTINF" playlist.m3u || echo "0")
         EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u || echo "0")
+        PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' playlist.m3u | wc -l || echo "0")
         
         git commit -m "🎵 Auto-create/update playlist.m3u - $TIMESTAMP
 
         🍪 Cookie: ${NEW_COOKIE:0:50}...
         📺 Channels: $CHANNEL_COUNT
-        🔧 #EXTHTTP entries: $EXTHTTP_COUNT
+        🔧 #EXTHTTP entries: $EXTHTTP_COUNT (${PROPERLY_FORMATTED} properly formatted)
         🤖 Auto-generated by GitHub Actions
         ⏰ Last update: $TIMESTAMP"
         
@@ -241,7 +279,8 @@ jobs:
       run: |
         # Remove temporary files
         rm -f source_playlist.m3u
-        rm -f new_cookie.txt
+        rm -f cookie_value.txt
+        rm -f cookie_json.txt
         rm -f playlist.m3u.backup
         
         echo "🧹 Cleanup completed"
@@ -258,14 +297,20 @@ jobs:
           CHANNEL_COUNT=$(grep -c "^#EXTINF" playlist.m3u || echo "0")
           EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u || echo "0")
           URL_COUNT=$(grep -c 'hdnea__=' playlist.m3u || echo "0")
+          PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' playlist.m3u | wc -l || echo "0")
           
           echo "📺 Total channels: $CHANNEL_COUNT"
           echo "🍪 #EXTHTTP entries: $EXTHTTP_COUNT"
           echo "🔗 URL entries: $URL_COUNT"
+          echo "✅ Properly formatted: $PROPERLY_FORMATTED"
           
           # Show current cookie info
-          CURRENT_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u | sed 's/.*"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "Not found")
+          CURRENT_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u | sed -n 's/.*"__hdnea__=\([^"]*\)".*/\1/p' 2>/dev/null || echo "Not found")
           echo "🍪 Current cookie: ${CURRENT_COOKIE:0:50}..."
+          
+          # Show sample #EXTHTTP line
+          echo "📄 Sample #EXTHTTP line:"
+          grep -m1 '#EXTHTTP:' playlist.m3u || echo "None found"
         fi
         
         echo "✨ Auto playlist creator completed!"
