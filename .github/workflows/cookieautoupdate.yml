@@ -95,11 +95,18 @@ jobs:
         # Clean and format cookie properly
         echo "🔧 Processing cookie format..."
         
-        # Remove any existing closing quotes/braces from the end
-        CLEAN_COOKIE=$(echo "$RAW_COOKIE" | sed 's/["}]*$//')
-        
-        # Add proper closing for JSON format
-        FORMATTED_COOKIE_JSON="${CLEAN_COOKIE}\"}"
+        # Check if cookie already ends with proper JSON closing
+        if [[ "$RAW_COOKIE" == *'"}'* ]]; then
+          # Cookie already properly formatted
+          FORMATTED_COOKIE_JSON="$RAW_COOKIE"
+          CLEAN_COOKIE=$(echo "$RAW_COOKIE" | sed 's/"}$//')
+          echo "✅ Cookie already properly formatted"
+        else
+          # Cookie needs formatting - clean any partial endings first
+          CLEAN_COOKIE=$(echo "$RAW_COOKIE" | sed 's/["}]*$//')
+          FORMATTED_COOKIE_JSON="${CLEAN_COOKIE}\"}"
+          echo "🔧 Added proper JSON closing to cookie"
+        fi
         
         # Save both formats
         echo "$CLEAN_COOKIE" > cookie_value.txt
@@ -171,14 +178,8 @@ jobs:
         
         echo "🔧 Updating #EXTHTTP cookie lines..."
         
-        # Update #EXTHTTP lines - handle multiple patterns
-        # Pattern 1: Properly formatted JSON
-        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*\"}|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_COOKIE_JSON\"}|g" "$PLAYLIST_FILE"
-        
-        # Pattern 2: Malformed JSON missing closing quotes/braces
-        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_COOKIE_JSON\"}|g" "$PLAYLIST_FILE"
-        
-        # Pattern 3: Any other #EXTHTTP pattern with hdnea
+        # Single comprehensive pattern to replace any #EXTHTTP line containing __hdnea__
+        # This handles all variations: properly formatted, malformed, partial, etc.
         sed -i "s|#EXTHTTP:.*__hdnea__=[^}\"]*[}\"]*|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_COOKIE_JSON\"}|g" "$PLAYLIST_FILE"
         
         echo "🔧 Updating URL cookie parameters..."
