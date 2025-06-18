@@ -12,7 +12,7 @@ on:
         type: string
 
 env:
-  M3U_SOURCE_URL: ${{ secrets.M3U_SOURCE_URL || github.event.inputs.m3u_url }}
+  M3U_SOURCE_URL: ${{ secrets.M3U_SOURCE_URL}}
 
 jobs:
   update-cookie:
