@@ -1,0 +1,270 @@
+name: Auto M3U Playlist Creator
+
+on:
+  schedule:
+    # Runs every 5 minutes to check for source changes
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  create-playlist:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.PAT_TOKEN }}
+        fetch-depth: 1
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Download source M3U and extract cookie
+      run: |
+        echo "=== AUTO PLAYLIST CREATOR STARTED ==="
+        
+        # Get the M3U source URL
+        M3U_SOURCE="${{ secrets.M3U_URL }}"
+        
+        # Validate input
+        if [ -z "$M3U_SOURCE" ]; then
+          echo "❌ ERROR: M3U_URL secret is empty!"
+          exit 1
+        fi
+        
+        echo "🔗 M3U Source: [HIDDEN]"
+        
+        # Download the source M3U playlist
+        echo "📥 Downloading source M3U playlist..."
+        if ! curl -s -L --connect-timeout 30 --max-time 60 "$M3U_SOURCE" > source_playlist.m3u; then
+          echo "❌ ERROR: Failed to download M3U playlist"
+          exit 1
+        fi
+        
+        # Check if download was successful
+        if [ ! -s source_playlist.m3u ]; then
+          echo "❌ ERROR: Downloaded M3U file is empty"
+          exit 1
+        fi
+        
+        TOTAL_LINES=$(wc -l < source_playlist.m3u)
+        echo "✅ Downloaded: $TOTAL_LINES lines"
+        
+        # Extract cookie from source
+        echo "🍪 Extracting cookie from source playlist..."
+        
+        # Look for cookie in #EXTHTTP lines
+        EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' source_playlist.m3u | sed 's/.*"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "")
+        
+        # If above fails, try extracting from malformed JSON
+        if [ -z "$EXTHTTP_COOKIE" ]; then
+          EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*__hdnea__' source_playlist.m3u | sed 's/.*__hdnea__=\([^"}]*\).*/\1/' 2>/dev/null || echo "")
+        fi
+        
+        # Look for cookie in URL parameters as fallback
+        URL_COOKIE=$(grep -m1 'hdnea__=' source_playlist.m3u | sed 's/.*__hdnea__=\([^&]*\).*/\1/' 2>/dev/null || echo "")
+        
+        # Use the first cookie found
+        RAW_COOKIE=""
+        if [ ! -z "$EXTHTTP_COOKIE" ]; then
+          RAW_COOKIE="$EXTHTTP_COOKIE"
+          echo "✅ Found cookie in #EXTHTTP: ${RAW_COOKIE:0:50}..."
+        elif [ ! -z "$URL_COOKIE" ]; then
+          RAW_COOKIE="$URL_COOKIE"
+          echo "✅ Found cookie in URL: ${RAW_COOKIE:0:50}..."
+        else
+          echo "❌ ERROR: No cookie found in source playlist!"
+          echo "🔍 Searching for any hdnea patterns..."
+          grep -n "hdnea" source_playlist.m3u | head -5
+          exit 1
+        fi
+        
+        # Fix cookie format - add "} if it doesn't end with "}
+        echo "🔧 Checking cookie format..."
+        if [[ "$RAW_COOKIE" == *'"}'* ]]; then
+          FIXED_COOKIE="$RAW_COOKIE"
+          echo "✅ Cookie already properly formatted: ${FIXED_COOKIE:0:50}..."
+        else
+          FIXED_COOKIE="${RAW_COOKIE}\"}"
+          echo "🔧 Fixed cookie format by adding closing: ${FIXED_COOKIE:0:50}..."
+        fi
+        
+        # Save the fixed cookie
+        echo "$FIXED_COOKIE" > new_cookie.txt
+        echo "💾 Cookie saved: ${FIXED_COOKIE:0:50}..."
+
+    - name: Check for existing playlist and compare cookies
+      id: check_changes
+      run: |
+        PLAYLIST_FILE="playlist.m3u"
+        NEW_COOKIE=$(cat new_cookie.txt)
+        
+        if [ -f "$PLAYLIST_FILE" ]; then
+          echo "📄 Found existing playlist.m3u"
+          
+          # Extract current cookie from existing playlist
+          CURRENT_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" | sed 's/.*"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "")
+          
+          if [ "$NEW_COOKIE" = "$CURRENT_COOKIE" ]; then
+            echo "✅ Cookie unchanged: ${NEW_COOKIE:0:50}..."
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          else
+            echo "🔄 Cookie change detected!"
+            echo "📋 Current: ${CURRENT_COOKIE:0:50}..."
+            echo "🆕 New:     ${NEW_COOKIE:0:50}..."
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "📝 No existing playlist.m3u found - will create new"
+          echo "needs_update=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create/Update playlist.m3u
+      if: steps.check_changes.outputs.needs_update == 'true'
+      run: |
+        echo "=== CREATING/UPDATING PLAYLIST.M3U ==="
+        
+        PLAYLIST_FILE="playlist.m3u"
+        NEW_COOKIE=$(cat new_cookie.txt)
+        
+        # Create backup if file exists
+        if [ -f "$PLAYLIST_FILE" ]; then
+          cp "$PLAYLIST_FILE" "${PLAYLIST_FILE}.backup"
+          echo "📋 Created backup of existing playlist"
+        fi
+        
+        # Copy source to new playlist
+        cp source_playlist.m3u "$PLAYLIST_FILE"
+        echo "📄 Created base playlist from source"
+        
+        # Escape special characters in the cookie for sed
+        ESCAPED_NEW_COOKIE=$(printf '%s\n' "$NEW_COOKIE" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        
+        echo "🔧 Updating #EXTHTTP cookie lines..."
+        # Update #EXTHTTP lines with proper JSON format
+        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*\"}|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_NEW_COOKIE\"}|g" "$PLAYLIST_FILE"
+        
+        # Also handle malformed #EXTHTTP lines and fix them
+        sed -i "s|#EXTHTTP:{\"cookie\":\"__hdnea__=[^\"]*|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_NEW_COOKIE\"}|g" "$PLAYLIST_FILE"
+        
+        echo "🔧 Updating URL cookie parameters..."
+        # Extract just the cookie value without "} for URL parameters
+        COOKIE_VALUE_ONLY=$(echo "$NEW_COOKIE" | sed 's/"}$//')
+        ESCAPED_COOKIE_VALUE=$(printf '%s\n' "$COOKIE_VALUE_ONLY" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        
+        # Update URL parameters
+        sed -i "s|__hdnea__=[^&]*|__hdnea__=$ESCAPED_COOKIE_VALUE|g" "$PLAYLIST_FILE"
+        
+        # Count updates
+        EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" || echo "0")
+        URL_COUNT=$(grep -c 'hdnea__=' "$PLAYLIST_FILE" || echo "0")
+        CHANNEL_COUNT=$(grep -c "^#EXTINF" "$PLAYLIST_FILE" || echo "0")
+        
+        echo "✅ Updated $EXTHTTP_COUNT #EXTHTTP entries"
+        echo "✅ Updated $URL_COUNT URL entries"
+        echo "📺 Total channels: $CHANNEL_COUNT"
+        
+        # Show sample of updated content
+        echo "=== SAMPLE UPDATED CONTENT ==="
+        echo "📄 Sample #EXTHTTP line:"
+        grep -m1 '#EXTHTTP:.*cookie' "$PLAYLIST_FILE" || echo "None found"
+        echo ""
+        echo "📄 Sample URL with cookie:"
+        grep -m1 'hdnea__=' "$PLAYLIST_FILE" | head -c 120 || echo "None found"
+        echo "..."
+
+    - name: Validate created playlist
+      if: steps.check_changes.outputs.needs_update == 'true'
+      run: |
+        echo "=== VALIDATING CREATED PLAYLIST ==="
+        
+        PLAYLIST_FILE="playlist.m3u"
+        
+        # Check if file is valid M3U
+        if ! head -1 "$PLAYLIST_FILE" | grep -q "#EXTM3U"; then
+          echo "❌ ERROR: File doesn't start with #EXTM3U"
+          exit 1
+        fi
+        
+        # Count various elements
+        CHANNEL_COUNT=$(grep -c "^#EXTINF" "$PLAYLIST_FILE" || echo "0")
+        EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" || echo "0")
+        URL_COUNT=$(grep -c 'hdnea__=' "$PLAYLIST_FILE" || echo "0")
+        
+        echo "✅ Playlist validation successful"
+        echo "📺 Channels: $CHANNEL_COUNT"
+        echo "🍪 #EXTHTTP entries: $EXTHTTP_COUNT"
+        echo "🔗 URL entries: $URL_COUNT"
+        
+        # Check cookie format in #EXTHTTP lines
+        PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' "$PLAYLIST_FILE" | wc -l || echo "0")
+        echo "✅ Properly formatted #EXTHTTP lines: $PROPERLY_FORMATTED"
+
+    - name: Commit and push changes
+      if: steps.check_changes.outputs.needs_update == 'true'
+      run: |
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Add the playlist file
+        git add playlist.m3u
+        
+        # Create detailed commit message
+        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        NEW_COOKIE=$(cat new_cookie.txt)
+        CHANNEL_COUNT=$(grep -c "^#EXTINF" playlist.m3u || echo "0")
+        EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u || echo "0")
+        
+        git commit -m "🎵 Auto-create/update playlist.m3u - $TIMESTAMP
+
+        🍪 Cookie: ${NEW_COOKIE:0:50}...
+        📺 Channels: $CHANNEL_COUNT
+        🔧 #EXTHTTP entries: $EXTHTTP_COUNT
+        🤖 Auto-generated by GitHub Actions
+        ⏰ Last update: $TIMESTAMP"
+        
+        # Push changes
+        git push
+        
+        echo "✅ playlist.m3u committed and pushed successfully"
+
+    - name: Cleanup
+      if: always()
+      run: |
+        # Remove temporary files
+        rm -f source_playlist.m3u
+        rm -f new_cookie.txt
+        rm -f playlist.m3u.backup
+        
+        echo "🧹 Cleanup completed"
+
+    - name: Workflow summary
+      if: always()
+      run: |
+        echo "=== AUTO PLAYLIST CREATOR SUMMARY ==="
+        echo "🏁 Status: ${{ job.status }}"
+        echo "🔄 Update needed: ${{ steps.check_changes.outputs.needs_update }}"
+        echo "⏰ Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+        
+        if [ -f playlist.m3u ]; then
+          CHANNEL_COUNT=$(grep -c "^#EXTINF" playlist.m3u || echo "0")
+          EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u || echo "0")
+          URL_COUNT=$(grep -c 'hdnea__=' playlist.m3u || echo "0")
+          
+          echo "📺 Total channels: $CHANNEL_COUNT"
+          echo "🍪 #EXTHTTP entries: $EXTHTTP_COUNT"
+          echo "🔗 URL entries: $URL_COUNT"
+          
+          # Show current cookie info
+          CURRENT_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u | sed 's/.*"__hdnea__=\([^"]*\)".*/\1/' 2>/dev/null || echo "Not found")
+          echo "🍪 Current cookie: ${CURRENT_COOKIE:0:50}..."
+        fi
+        
+        echo "✨ Auto playlist creator completed!"
