@@ -4,6 +4,7 @@ on:
   schedule:
     # Runs every 5 minutes to check for source changes
     - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual triggering
 
 permissions:
   contents: write
