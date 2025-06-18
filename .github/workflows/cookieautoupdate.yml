@@ -1,4 +1,4 @@
-name: Update M3U Cookie New
+name: Update M3U Cookie
 
 on:
   schedule:
@@ -12,7 +12,7 @@ on:
         type: string
 
 env:
-  M3U_SOURCE_URL: ${{ secrets.M3U_SOURCE_URL}}
+  M3U_SOURCE_URL: ${{ secrets.M3U_SOURCE_URL || github.event.inputs.m3u_url }}
 
 jobs:
   update-cookie:
@@ -66,12 +66,13 @@ jobs:
         COOKIE="${{ steps.get-cookie.outputs.EXTRACTED_COOKIE }}"
         
         echo "Updating playlist.m3u with new cookie..."
+        echo "Cookie to update: $COOKIE"
         
-        # Update the EXTHTTP cookie line
-        sed -i "s/#EXTHTTP:{\"cookie\":\"[^\"]*\"}/#EXTHTTP:{\"cookie\":\"$COOKIE\"}/g" playlist.m3u
+        # Update the EXTHTTP cookie line - escape special characters
+        sed -i 's|#EXTHTTP:{"cookie":"[^"]*"}|#EXTHTTP:{"cookie":"'"$COOKIE"'"}|g' playlist.m3u
         
-        # Update the URL cookie parameter
-        sed -i "s/cookie=([^)]*/cookie=($COOKIE/g" playlist.m3u
+        # Update the URL cookie parameter - escape special characters  
+        sed -i 's|cookie=([^)]*|cookie=('"$COOKIE"'|g' playlist.m3u
         
         echo "Cookie updated successfully!"
         
