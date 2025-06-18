@@ -1,317 +1,108 @@
-name: Auto M3U Playlist Creator
+name: Update M3U Cookie New
 
 on:
   schedule:
-    # Runs every 5 minutes to check for source changes
+    # Run every 5 minutes
     - cron: '*/5 * * * *'
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
+    inputs:
+      m3u_url:
+        description: 'M3U URL to fetch cookie from'
+        required: true
+        type: string
 
-permissions:
-  contents: write
-  actions: read
+env:
+  M3U_SOURCE_URL: ${{ secrets.M3U_SOURCE_URL || github.event.inputs.m3u_url }}
 
 jobs:
-  create-playlist:
+  update-cookie:
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.PAT_TOKEN }}
-        fetch-depth: 1
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-
-    - name: Download source M3U and extract cookie
+    
+    - name: Fetch cookie from M3U source
+      id: get-cookie
       run: |
-        echo "=== AUTO PLAYLIST CREATOR STARTED ==="
+        echo "Fetching M3U from source..."
         
-        # Get the M3U source URL
-        M3U_SOURCE="${{ secrets.M3U_URL }}"
+        # Download the M3U file
+        curl -s "${{ env.M3U_SOURCE_URL }}" -o temp_source.m3u
         
-        # Validate input
-        if [ -z "$M3U_SOURCE" ]; then
-          echo "❌ ERROR: M3U_URL secret is empty!"
-          exit 1
+        # Extract cookie from the M3U file
+        # Look for cookie in EXTHTTP or URL parameters
+        COOKIE=""
+        
+        # Check for cookie in EXTHTTP line
+        if grep -q "EXTHTTP" temp_source.m3u; then
+          COOKIE=$(grep "EXTHTTP" temp_source.m3u | sed -n 's/.*"cookie":"\([^"]*\)".*/\1/p' | head -1)
         fi
         
-        echo "🔗 M3U Source: [HIDDEN]"
-        
-        # Download the source M3U playlist
-        echo "📥 Downloading source M3U playlist..."
-        if ! curl -s -L --connect-timeout 30 --max-time 60 "$M3U_SOURCE" > source_playlist.m3u; then
-          echo "❌ ERROR: Failed to download M3U playlist"
-          exit 1
+        # If no cookie in EXTHTTP, check URL parameters
+        if [ -z "$COOKIE" ]; then
+          COOKIE=$(grep -o 'cookie=([^)]*' temp_source.m3u | sed 's/cookie=(//' | head -1)
         fi
         
-        # Check if download was successful
-        if [ ! -s source_playlist.m3u ]; then
-          echo "❌ ERROR: Downloaded M3U file is empty"
-          exit 1
+        # If still no cookie, check for __hdnea__ pattern
+        if [ -z "$COOKIE" ]; then
+          COOKIE=$(grep -o '__hdnea__=[^&]*' temp_source.m3u | head -1)
         fi
         
-        TOTAL_LINES=$(wc -l < source_playlist.m3u)
-        echo "✅ Downloaded: $TOTAL_LINES lines"
+        # Clean up the cookie (remove quotes, brackets, etc.)
+        COOKIE=$(echo "$COOKIE" | sed 's/["{}\[\]]//g')
         
-        # Extract cookie from source
-        echo "🍪 Extracting cookie from source playlist..."
+        echo "Extracted cookie: $COOKIE"
+        echo "EXTRACTED_COOKIE=$COOKIE" >> $GITHUB_OUTPUT
         
-        # Look for cookie in #EXTHTTP lines - improved extraction
-        EXTHTTP_COOKIE=""
+        # Clean up temp file
+        rm -f temp_source.m3u
+    
+    - name: Update playlist.m3u
+      if: steps.get-cookie.outputs.EXTRACTED_COOKIE != ''
+      run: |
+        COOKIE="${{ steps.get-cookie.outputs.EXTRACTED_COOKIE }}"
         
-        # Method 1: Extract from properly formatted JSON
-        EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' source_playlist.m3u | sed -n 's/.*"__hdnea__=\([^"]*\)".*/\1/p' 2>/dev/null || echo "")
+        echo "Updating playlist.m3u with new cookie..."
         
-        # Method 2: Extract from malformed JSON (missing closing quotes/braces)
-        if [ -z "$EXTHTTP_COOKIE" ]; then
-          EXTHTTP_COOKIE=$(grep -m1 '#EXTHTTP:.*__hdnea__' source_playlist.m3u | sed -n 's/.*__hdnea__=\([^"}\s]*\).*/\1/p' 2>/dev/null || echo "")
-        fi
+        # Update the EXTHTTP cookie line
+        sed -i "s/#EXTHTTP:{\"cookie\":\"[^\"]*\"}/#EXTHTTP:{\"cookie\":\"$COOKIE\"}/g" playlist.m3u
         
-        # Method 3: Look for cookie in URL parameters as fallback
-        URL_COOKIE=""
-        if [ -z "$EXTHTTP_COOKIE" ]; then
-          URL_COOKIE=$(grep -m1 'hdnea__=' source_playlist.m3u | sed -n 's/.*__hdnea__=\([^&\s]*\).*/\1/p' 2>/dev/null || echo "")
-        fi
+        # Update the URL cookie parameter
+        sed -i "s/cookie=([^)]*/cookie=($COOKIE/g" playlist.m3u
         
-        # Use the first cookie found
-        RAW_COOKIE=""
-        if [ ! -z "$EXTHTTP_COOKIE" ]; then
-          RAW_COOKIE="$EXTHTTP_COOKIE"
-          echo "✅ Found cookie in #EXTHTTP: ${RAW_COOKIE:0:50}..."
-        elif [ ! -z "$URL_COOKIE" ]; then
-          RAW_COOKIE="$URL_COOKIE"
-          echo "✅ Found cookie in URL: ${RAW_COOKIE:0:50}..."
+        echo "Cookie updated successfully!"
+        
+        # Show the changes
+        echo "Updated lines in playlist.m3u:"
+        grep -n "cookie" playlist.m3u || echo "No cookie lines found"
+    
+    - name: Check for changes
+      id: check-changes
+      run: |
+        if git diff --quiet playlist.m3u; then
+          echo "No changes detected in playlist.m3u"
+          echo "HAS_CHANGES=false" >> $GITHUB_OUTPUT
         else
-          echo "❌ ERROR: No cookie found in source playlist!"
-          echo "🔍 Searching for any hdnea patterns..."
-          grep -n "hdnea" source_playlist.m3u | head -5
-          exit 1
+          echo "Changes detected in playlist.m3u"
+          echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
+          echo "Changes:"
+          git diff playlist.m3u
         fi
-        
-        # Clean and format cookie properly
-        echo "🔧 Processing cookie format..."
-        
-        # Check if cookie already ends with proper JSON closing
-        if [[ "$RAW_COOKIE" == *'"}'* ]]; then
-          # Cookie already properly formatted
-          FORMATTED_COOKIE_JSON="$RAW_COOKIE"
-          CLEAN_COOKIE=$(echo "$RAW_COOKIE" | sed 's/"}$//')
-          echo "✅ Cookie already properly formatted"
-        else
-          # Cookie needs formatting - clean any partial endings first
-          CLEAN_COOKIE=$(echo "$RAW_COOKIE" | sed 's/["}]*$//')
-          FORMATTED_COOKIE_JSON="${CLEAN_COOKIE}\"}"
-          echo "🔧 Added proper JSON closing to cookie"
-        fi
-        
-        # Save both formats
-        echo "$CLEAN_COOKIE" > cookie_value.txt
-        echo "$FORMATTED_COOKIE_JSON" > cookie_json.txt
-        
-        echo "💾 Cookie value: ${CLEAN_COOKIE:0:50}..."
-        echo "💾 Cookie JSON: ${FORMATTED_COOKIE_JSON:0:50}..."
-
-    - name: Check for existing playlist and compare cookies
-      id: check_changes
-      run: |
-        PLAYLIST_FILE="playlist.m3u"
-        NEW_COOKIE_VALUE=$(cat cookie_value.txt)
-        
-        if [ -f "$PLAYLIST_FILE" ]; then
-          echo "📄 Found existing playlist.m3u"
-          
-          # Extract current cookie from existing playlist (just the value part)
-          CURRENT_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" | sed -n 's/.*"__hdnea__=\([^"]*\)".*/\1/p' 2>/dev/null || echo "")
-          
-          # Remove any trailing quotes/braces for comparison
-          CURRENT_COOKIE_CLEAN=$(echo "$CURRENT_COOKIE" | sed 's/["}]*$//')
-          
-          if [ "$NEW_COOKIE_VALUE" = "$CURRENT_COOKIE_CLEAN" ]; then
-            echo "✅ Cookie unchanged: ${NEW_COOKIE_VALUE:0:50}..."
-            echo "needs_update=false" >> $GITHUB_OUTPUT
-          else
-            echo "🔄 Cookie change detected!"
-            echo "📋 Current: ${CURRENT_COOKIE_CLEAN:0:50}..."
-            echo "🆕 New:     ${NEW_COOKIE_VALUE:0:50}..."
-            echo "needs_update=true" >> $GITHUB_OUTPUT
-          fi
-        else
-          echo "📝 No existing playlist.m3u found - will create new"
-          echo "needs_update=true" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Create/Update playlist.m3u
-      if: steps.check_changes.outputs.needs_update == 'true'
-      run: |
-        echo "=== CREATING/UPDATING PLAYLIST.M3U ==="
-        
-        PLAYLIST_FILE="playlist.m3u"
-        COOKIE_VALUE=$(cat cookie_value.txt)
-        COOKIE_JSON=$(cat cookie_json.txt)
-        
-        # Create backup if file exists
-        if [ -f "$PLAYLIST_FILE" ]; then
-          cp "$PLAYLIST_FILE" "${PLAYLIST_FILE}.backup"
-          echo "📋 Created backup of existing playlist"
-        fi
-        
-        # Copy source to new playlist
-        cp source_playlist.m3u "$PLAYLIST_FILE"
-        echo "📄 Created base playlist from source"
-        
-        # Debug: Show what we're working with
-        echo "🔍 Debug info:"
-        echo "   Cookie value: ${COOKIE_VALUE:0:50}..."
-        echo "   Cookie JSON:  ${COOKIE_JSON:0:50}..."
-        
-        # Show sample original #EXTHTTP line
-        echo "📄 Original #EXTHTTP sample:"
-        grep -m1 '#EXTHTTP' "$PLAYLIST_FILE" || echo "None found"
-        
-        # Escape special characters for sed
-        ESCAPED_COOKIE_JSON=$(printf '%s\n' "$COOKIE_JSON" | sed 's/[[\.*^$()+?{|]/\\&/g')
-        ESCAPED_COOKIE_VALUE=$(printf '%s\n' "$COOKIE_VALUE" | sed 's/[[\.*^$()+?{|]/\\&/g')
-        
-        echo "🔧 Updating #EXTHTTP cookie lines..."
-        
-        # Single comprehensive pattern to replace any #EXTHTTP line containing __hdnea__
-        # This handles all variations: properly formatted, malformed, partial, etc.
-        sed -i "s|#EXTHTTP:.*__hdnea__=[^}\"]*[}\"]*|#EXTHTTP:{\"cookie\":\"__hdnea__=$ESCAPED_COOKIE_JSON\"}|g" "$PLAYLIST_FILE"
-        
-        echo "🔧 Updating URL cookie parameters..."
-        # Update URL parameters (these don't need the "} ending)
-        sed -i "s|__hdnea__=[^&\s]*|__hdnea__=$ESCAPED_COOKIE_VALUE|g" "$PLAYLIST_FILE"
-        
-        # Show sample updated #EXTHTTP line
-        echo "📄 Updated #EXTHTTP sample:"
-        grep -m1 '#EXTHTTP' "$PLAYLIST_FILE" || echo "None found"
-        
-        # Count updates
-        EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" || echo "0")
-        URL_COUNT=$(grep -c 'hdnea__=' "$PLAYLIST_FILE" || echo "0")
-        CHANNEL_COUNT=$(grep -c "^#EXTINF" "$PLAYLIST_FILE" || echo "0")
-        
-        echo "✅ Updated $EXTHTTP_COUNT #EXTHTTP entries"
-        echo "✅ Updated $URL_COUNT URL entries"
-        echo "📺 Total channels: $CHANNEL_COUNT"
-        
-        # Verify the format is correct
-        echo "🔍 Verifying #EXTHTTP format..."
-        PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' "$PLAYLIST_FILE" | wc -l || echo "0")
-        TOTAL_EXTHTTP=$(grep '#EXTHTTP:' "$PLAYLIST_FILE" | wc -l || echo "0")
-        echo "✅ Properly formatted #EXTHTTP lines: $PROPERLY_FORMATTED/$TOTAL_EXTHTTP"
-        
-        if [ "$PROPERLY_FORMATTED" -lt "$TOTAL_EXTHTTP" ]; then
-          echo "⚠️  Some #EXTHTTP lines may not be properly formatted"
-          echo "📄 Sample #EXTHTTP lines:"
-          grep '#EXTHTTP:' "$PLAYLIST_FILE" | head -3
-        fi
-
-    - name: Validate created playlist
-      if: steps.check_changes.outputs.needs_update == 'true'
-      run: |
-        echo "=== VALIDATING CREATED PLAYLIST ==="
-        
-        PLAYLIST_FILE="playlist.m3u"
-        
-        # Check if file is valid M3U
-        if ! head -1 "$PLAYLIST_FILE" | grep -q "#EXTM3U"; then
-          echo "❌ ERROR: File doesn't start with #EXTM3U"
-          exit 1
-        fi
-        
-        # Count various elements
-        CHANNEL_COUNT=$(grep -c "^#EXTINF" "$PLAYLIST_FILE" || echo "0")
-        EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' "$PLAYLIST_FILE" || echo "0")
-        URL_COUNT=$(grep -c 'hdnea__=' "$PLAYLIST_FILE" || echo "0")
-        
-        echo "✅ Playlist validation successful"
-        echo "📺 Channels: $CHANNEL_COUNT"
-        echo "🍪 #EXTHTTP entries: $EXTHTTP_COUNT"
-        echo "🔗 URL entries: $URL_COUNT"
-        
-        # Check cookie format in #EXTHTTP lines
-        PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' "$PLAYLIST_FILE" | wc -l || echo "0")
-        MALFORMED=$(grep '#EXTHTTP:.*__hdnea__' "$PLAYLIST_FILE" | grep -v '"}' | wc -l || echo "0")
-        
-        echo "✅ Properly formatted #EXTHTTP lines: $PROPERLY_FORMATTED"
-        if [ "$MALFORMED" -gt 0 ]; then
-          echo "⚠️  Malformed #EXTHTTP lines: $MALFORMED"
-          echo "📄 Examples of malformed lines:"
-          grep '#EXTHTTP:.*__hdnea__' "$PLAYLIST_FILE" | grep -v '"}' | head -2
-        fi
-
+    
     - name: Commit and push changes
-      if: steps.check_changes.outputs.needs_update == 'true'
+      if: steps.check-changes.outputs.HAS_CHANGES == 'true'
       run: |
-        # Configure git
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        
-        # Add the playlist file
         git add playlist.m3u
-        
-        # Create detailed commit message
-        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-        NEW_COOKIE=$(cat cookie_value.txt)
-        CHANNEL_COUNT=$(grep -c "^#EXTINF" playlist.m3u || echo "0")
-        EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u || echo "0")
-        PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' playlist.m3u | wc -l || echo "0")
-        
-        git commit -m "🎵 Auto-create/update playlist.m3u - $TIMESTAMP
-
-        🍪 Cookie: ${NEW_COOKIE:0:50}...
-        📺 Channels: $CHANNEL_COUNT
-        🔧 #EXTHTTP entries: $EXTHTTP_COUNT (${PROPERLY_FORMATTED} properly formatted)
-        🤖 Auto-generated by GitHub Actions
-        ⏰ Last update: $TIMESTAMP"
-        
-        # Push changes
+        git commit -m "Update M3U cookie - $(date '+%Y-%m-%d %H:%M:%S')"
         git push
-        
-        echo "✅ playlist.m3u committed and pushed successfully"
-
-    - name: Cleanup
-      if: always()
+        echo "Changes committed and pushed successfully!"
+    
+    - name: No changes needed
+      if: steps.check-changes.outputs.HAS_CHANGES == 'false'
       run: |
-        # Remove temporary files
-        rm -f source_playlist.m3u
-        rm -f cookie_value.txt
-        rm -f cookie_json.txt
-        rm -f playlist.m3u.backup
-        
-        echo "🧹 Cleanup completed"
-
-    - name: Workflow summary
-      if: always()
-      run: |
-        echo "=== AUTO PLAYLIST CREATOR SUMMARY ==="
-        echo "🏁 Status: ${{ job.status }}"
-        echo "🔄 Update needed: ${{ steps.check_changes.outputs.needs_update }}"
-        echo "⏰ Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-        
-        if [ -f playlist.m3u ]; then
-          CHANNEL_COUNT=$(grep -c "^#EXTINF" playlist.m3u || echo "0")
-          EXTHTTP_COUNT=$(grep -c '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u || echo "0")
-          URL_COUNT=$(grep -c 'hdnea__=' playlist.m3u || echo "0")
-          PROPERLY_FORMATTED=$(grep '#EXTHTTP:.*"}' playlist.m3u | wc -l || echo "0")
-          
-          echo "📺 Total channels: $CHANNEL_COUNT"
-          echo "🍪 #EXTHTTP entries: $EXTHTTP_COUNT"
-          echo "🔗 URL entries: $URL_COUNT"
-          echo "✅ Properly formatted: $PROPERLY_FORMATTED"
-          
-          # Show current cookie info
-          CURRENT_COOKIE=$(grep -m1 '#EXTHTTP:.*cookie.*__hdnea__' playlist.m3u | sed -n 's/.*"__hdnea__=\([^"]*\)".*/\1/p' 2>/dev/null || echo "Not found")
-          echo "🍪 Current cookie: ${CURRENT_COOKIE:0:50}..."
-          
-          # Show sample #EXTHTTP line
-          echo "📄 Sample #EXTHTTP line:"
-          grep -m1 '#EXTHTTP:' playlist.m3u || echo "None found"
-        fi
-        
-        echo "✨ Auto playlist creator completed!"
+        echo "Cookie is already up to date. No changes needed."
