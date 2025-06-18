@@ -5,14 +5,9 @@ on:
     # Run every 5 minutes
     - cron: '*/5 * * * *'
   workflow_dispatch:
-    inputs:
-      m3u_url:
-        description: 'M3U URL to fetch cookie from'
-        required: true
-        type: string
 
 env:
-  M3U_SOURCE_URL: ${{ secrets.M3U_SOURCE_URL || github.event.inputs.m3u_url }}
+  M3U_SOURCE_URL: ${{ secrets.M3U_SOURCE_URL }}
 
 jobs:
   update-cookie:
@@ -68,16 +63,21 @@ jobs:
         echo "Updating playlist.m3u with new cookie..."
         echo "Cookie to update: $COOKIE"
         
-        # Update the EXTHTTP cookie line - escape special characters
+        # Show current content before update
+        echo "Before update:"
+        grep -n "cookie" playlist.m3u || echo "No cookie lines found"
+        
+        # Update the EXTHTTP cookie line
         sed -i 's|#EXTHTTP:{"cookie":"[^"]*"}|#EXTHTTP:{"cookie":"'"$COOKIE"'"}|g' playlist.m3u
         
-        # Update the URL cookie parameter - escape special characters  
-        sed -i 's|cookie=([^)]*|cookie=('"$COOKIE"'|g' playlist.m3u
+        # Update the URL cookie parameter - both formats
+        sed -i 's|cookie=([^)]*)|cookie=('"$COOKIE"')|g' playlist.m3u
+        sed -i 's|%7Ccookie=([^)]*)|%7Ccookie=('"$COOKIE"')|g' playlist.m3u
         
         echo "Cookie updated successfully!"
         
-        # Show the changes
-        echo "Updated lines in playlist.m3u:"
+        # Show updated content
+        echo "After update:"
         grep -n "cookie" playlist.m3u || echo "No cookie lines found"
     
     - name: Check for changes
