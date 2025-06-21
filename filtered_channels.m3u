@@ -389,7 +389,7 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Pogo_Hindi_MOB/WDVLive/index.mpd?%7Ccooki
 #KODIPROP:inputstream.adaptive.license_key=36762890a11b5ed9bc633626b7b8fca1:2b7b31848c9047e232543b883bc59a1a
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
 #EXTHTTP:{"cookie":"__hdnea__=st=1750504851~exp=1750591251~acl=/*~hmac=b1a1c13a54bd639c0702977f5bfee09c89ed00b794051a922b7a84ba7952c446
-https://jiotvmblive.cdn.jio.com/bpk-tv/Kushi_TV_MOB/WDVLive/index.mpd?%7Ccookie=hdnea=st=1750504851~exp=1750591251~acl=/*~hmac=b1a1c13a54bd639c0702977f5bfee09c89ed00b794051a922b7a84ba7952c446
+https://jiotvmblive.cdn.jio.com/bpk-tv/Kushi_TV_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1750504851~exp=1750591251~acl=/*~hmac=b1a1c13a54bd639c0702977f5bfee09c89ed00b794051a922b7a84ba7952c446
 
 #EXTINF:-1 tvg-id="1373" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Disney_Channel.png",Disney Channel
 #KODIPROP:inputstream.adaptive.license_type=clearkey
