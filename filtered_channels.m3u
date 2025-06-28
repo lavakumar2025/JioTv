@@ -1,6 +1,11 @@
 #EXTM3U
 #EXTM3U x-tvg-url="https://avkb.short.gy/jioepg.xml.gz"
-
+#EXTINF:-1 tvg-id="9000" group-title="Kids" tvg-logo="https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DISCOVERY_HD_WORLD/images/LOGO_HD/image.png",Kushi TV
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=03a4ddf234ff31dc8cb54f0232db13ce:aa9b64221b52920e2cff19a7729d3229
+#EXTVLCOPT:http-user-agent=tv.accedo.airtel.wynk/1.97.1 (Linux;Android 11) ygx/69.1 ExoPlayerLib/2.19.1
+#EXTHTTP:{"cookie":"Edge-Cache-Cookie=URLPrefix=aHR0cHM6Ly9jb21wYW5pb24tbGl2ZS1wbGF5MS5zdHJlYW1yZWFkeS5pbi9saXZlL21lZDE0LTIvZGlzY292ZXJ5X2hkX3dvcmxkL25kYXNoaGQv:Expires=1751130018:KeyName=iptv-prod-media-cdn-keys:Signature=Xj_miZZUgYpVT_aKHzJ_hYFtwBhd4ZJ8z4zSdkonE96QAjLUQChv9VWum0dfMW55yfKO7S1F9qYDvboeaSWJBg=="}
+https://companion-live-play1.streamready.in/live/med14-2/discovery_hd_world/ndashhd/discovery_hd_world.mpd?%7Ccookie=Edge-Cache-Cookie=URLPrefix=aHR0cHM6Ly9jb21wYW5pb24tbGl2ZS1wbGF5MS5zdHJlYW1yZWFkeS5pbi9saXZlL21lZDE0LTIvZGlzY292ZXJ5X2hkX3dvcmxkL25kYXNoaGQv:Expires=1751130018:KeyName=iptv-prod-media-cdn-keys:Signature=Xj_miZZUgYpVT_aKHzJ_hYFtwBhd4ZJ8z4zSdkonE96QAjLUQChv9VWum0dfMW55yfKO7S1F9qYDvboeaSWJBg==
 #EXTINF:-1 tvg-id="1111" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_Movies_HD.png",Star Maa Movies HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=6dff9a2c741754c1b75312c53bc83d92:b75a65f46065ee70de75a88fed692846
