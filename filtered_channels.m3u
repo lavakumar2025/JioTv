@@ -170,11 +170,6 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/ETV_Cinema_BTS/output/index.mpd?%7Ccookie
 #EXTHTTP:{"cookie":"__hdnea__=st=1751680834~exp=1751767234~acl=/*~hmac=68d9d370e73bc8c1db863b17672ebd75ec7606cde3358ee9e2f43c7f6c6294f3
 https://jiotvmblive.cdn.jio.com/bpk-tv/ETV_Abhiruchi_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1751680834~exp=1751767234~acl=/*~hmac=68d9d370e73bc8c1db863b17672ebd75ec7606cde3358ee9e2f43c7f6c6294f3
 
-#EXTINF:-1 tvg-id="4008" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeetelugu/app_cover/1920x1080appbanner0d53261e16dc413eb7f558be744b8c2e.jpg" group-title="Entertainment", Zee Telugu HD
-https://mini.allinonereborn.xyz/zee111/index.php?id=0-9-zeetelugu
-
-#EXTINF:-1 tvg-id="4009" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeecinemalu/app_cover/1920x1080appcoverae8446a12eb44e9595de69615c82d0f4.jpg" group-title="Entertainment", Zee Cinemalu HD
-https://mini.allinonereborn.xyz/zee111/index.php?id=0-9-zeecinemalu
 
 #EXTINF:-1 tvg-id="629" group-title="Entertainment" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Telugu.png",ETV Telugu
 #KODIPROP:inputstream.adaptive.license_type=clearkey
@@ -238,6 +233,20 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Gemini_Music_HD_MOB/WDVLive/index.mpd?%7C
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
 #EXTHTTP:{"cookie":"__hdnea__=st=1751680834~exp=1751767234~acl=/*~hmac=68d9d370e73bc8c1db863b17672ebd75ec7606cde3358ee9e2f43c7f6c6294f3
 https://jiotvmblive.cdn.jio.com/bpk-tv/Gemini_Movies_HD_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1751680834~exp=1751767234~acl=/*~hmac=68d9d370e73bc8c1db863b17672ebd75ec7606cde3358ee9e2f43c7f6c6294f3
+
+#EXTINF:-1 tvg-id="zee-telugu" tvg-name="Zee Telugu" tvg-language="Telugu" tvg-country="IN" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeetelugu/app_cover/1920x1080appbanner0d53261e16dc413eb7f558be744b8c2e.jpg" tvg-chno="zee-telugu" group-title="Entertainment",Zee Telugu
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstreamaddon=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://otttv.co.in/d2h/livestream/zee-telugu/drmLicense
+https://otttv.co.in/d2h/livestream/zee-telugu/manifest.mpd
+
+#EXTINF:-1 tvg-id="zee-cinemalu" tvg-name="Zee Cinemalu" tvg-language="Telugu" tvg-country="IN" tvg-logo="https://akamaividz2.zee5.com/image/upload/w_480,h_270,c_scale,f_webp,q_auto:eco/resources/0-9-zeecinemalu/app_cover/1920x1080appcoverae8446a12eb44e9595de69615c82d0f4.jpg" tvg-chno="zee-cinemalu" group-title="Movies",Zee Cinemalu
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstreamaddon=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://otttv.co.in/d2h/livestream/zee-cinemalu/drmLicense
+https://otttv.co.in/d2h/livestream/zee-cinemalu/manifest.mpd
 
 
 #EXTINF:-1 tvg-id="1254" group-title="Devotional" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Aastha_Telugu.png",Aastha Telugu
