@@ -455,3 +455,29 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/ETV_Andhra_pradesh_BTS/output/index.mpd?%
 #EXTHTTP:{"cookie":"__hdnea__=st=1752113248~exp=1752199648~acl=/*~hmac=f93a2d76e26b5d1b53b5000d45e9af3cdb232d1d87fa685790f979dcd5e838cf"}
 https://jiotvmblive.cdn.jio.com/bpk-tv/TV9_Telugu_News_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1750159300~exp=1750245700~acl=/*~hmac=dc9aefe01d42aec99a9cf17876cc0bc115ce2a38f69131a022c2a0f0563a9487
  
+#EXTINF:-1 tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Ten_1.png" group-title="Sony",SONY TEN 1
+https://la.drmlive.net/tp/sliv-ten1.m3u8
+#EXTINF:-1 tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Ten_2.png" group-title="Sony",SONY TEN 2
+https://la.drmlive.net/tp/sliv-ten2.m3u8
+#EXTINF:-1 tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Ten_3.png" group-title="Sony",SONY TEN 3
+https://la.drmlive.net/tp/sliv-ten3.m3u8
+#EXTINF:-1 tvg-logo="https://www.sonypicturesnetworks.com/images/logos/SONY_SportsTen4_SD_Logo_CLR.png" group-title="Sony",SONY TEN 4 
+https://la.drmlive.net/tp/sliv-ten4.m3u8
+#EXTINF:-1 tvg-logo="https://www.sonypicturesnetworks.com/images/logos/SONY_SportsTen5_SD_Logo_CLR.png" group-title="Sony",SONY TEN 5 
+https://la.drmlive.net/tp/sliv-ten5.m3u8
+#EXTINF:-1 tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Ten_HD.png" group-title="Sony",SONY TEN 1 HD
+https://la.drmlive.net/tp/sliv-ten1hd.m3u8
+#EXTINF:-1 tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Ten2_HD.png" group-title="Sony",SONY TEN 2 HD
+https://la.drmlive.net/tp/sliv-ten2hd.m3u8
+#EXTINF:-1 tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Ten3_HD.png" group-title="Sony",SONY TEN 3 HD
+https://la.drmlive.net/tp/sliv-ten3hd.m3u8
+#EXTINF:-1 tvg-logo="https://www.sonypicturesnetworks.com/images/logos/SONY_SportsTen4_HD_Logo_CLR.png" group-title="Sony",SONY TEN 4 HD
+https://la.drmlive.net/tp/sliv-ten4hd.m3u8
+#EXTINF:-1 tvg-logo="https://www.sonypicturesnetworks.com/images/logos/SONY_SportsTen5_HD_Logo_CLR.png" group-title="Sony",SONY TEN 5 HD
+https://la.drmlive.net/tp/sliv-ten5hd.m3u8
+#EXTINF:-1 tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Sony_BBC_Earth_HD.png" group-title="Sony",SONY BBC EARTH
+https://la.drmlive.net/tp/sliv-bbc.m3u8
+#EXTINF:-1 tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Sony_Yay_Hindi.png" group-title="Sony",SONY YAY
+https://la.drmlive.net/tp/sliv-yay.m3u8
+#EXTINF:-1 tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Sony_Pix_HD.png" group-title="Sony",SONY PIX HD
+https://la.drmlive.net/tp/sliv-pix.m3u8
