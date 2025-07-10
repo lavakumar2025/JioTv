@@ -492,3 +492,13 @@ https://airtel.fredflix.fun/api/841014ab2aa3825056d7a606d6c6c1f2.mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=3eec4a1a86f53202b33fa368ba56481d:13f023cd7173da9623e41493467046c3
 https://airtel.fredflix.fun/api/1fe9c922cfa1b46aad0e3daadf550c24.mpd
+
+#EXTINF:-1 tvg-id="" tvg-name="Sony PIX HD" tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Sony_Pix_HD.png",Sony PIX HD group-title="", Sony PIX HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=h9atQSMVOFWJYnRfLEIBSw:Og9nThUp_PqqHooxeNkxOQ
+https://srv1.redjoytv.pro/atv/248.mpd
+
+#EXTINF:-1 tvg-id="" tvg-name="Sony BBC Earth HD" tvg-logo="http://jiotv.catchup.cdn.jio.com/dare_images/images/Sony_BBC_Earth_HD.png",Sony BBC Earth HD group-title="Infotainment", Sony BBC Earth HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=UHxiEWpiOYCqEgEpLuO1vw:R54r975Pjgamp92n-kGI8w
+https://srv1.redjoytv.pro/atv/439.mpd
