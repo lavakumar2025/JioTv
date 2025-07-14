@@ -157,6 +157,9 @@ https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_Select_HD_2_BTS/output/index.
 #EXTHTTP:{"cookie":"__hdnea__=st=1752459630~exp=1752546030~acl=/*~hmac=215cf45ef0868c5103cf7e95b97840d71b38ab380c515f64c67b6e724a83eb90
 https://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_Select_2_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1752459630~exp=1752546030~acl=/*~hmac=215cf45ef0868c5103cf7e95b97840d71b38ab380c515f64c67b6e724a83eb90
 
+#EXTINF:-1 tvg-logo="https://www.sonypicturesnetworks.com/images/logos/SONY_SportsTen4_HD_Logo_CLR.png" group-title="Sony",SONY TEN 4 Telugu
+https://la.drmlive.net/tp/sliv-ten4hd.m3u8
+
 #EXTINF:-1 tvg-id="252" group-title="Movies" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Cinema.png",ETV Cinema
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=5fb661859e145a829c55ce0aefa151f8:19f2f9f4ac7ff282d1a23765709d4c3d
