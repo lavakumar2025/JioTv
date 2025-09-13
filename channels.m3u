@@ -3,6 +3,20 @@
 #EXTM3U x-tvg-url="https://www.tsepg.cf/epg.xml.gz"
 #EXTM3U x-tvg-url="https://avkb.short.gy/tsepg.xml.gz"
 
+#EXTINF:-1 tvg-id="asiatelugu" group-title="Kids" tvg-logo="",Asia Cup Telugu 
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=b4efe4dcb98058a2a19d756a4a1f7402:b0018aea46a003d5ddc95487b875a336
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
+#EXTHTTP:{"cookie":"__hdnea__=st=1757761351~exp=1757847751~acl=/*~hmac=d6b1633aba1e08c057262a89f1a7e02692f43ccc77047dc60b2285e1ccf21c39"}
+https://jiotvmblive.cdn.jio.com/bpk-tv/Asia_Cup_Telugu_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1757761351~exp=1757847751~acl=/*~hmac=d6b1633aba1e08c057262a89f1a7e02692f43ccc77047dc60b2285e1ccf21c39
+
+#EXTINF:-1 tvg-id="asiatamil" group-title="Kids" tvg-logo="",Asia Cup Tamil 
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=9aaf70c2635657aba43a7517bbbaef7f:019329bacb682ae52687226a4d2e8730
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
+#EXTHTTP:{"cookie":"__hdnea__=st=1757761351~exp=1757847751~acl=/*~hmac=d6b1633aba1e08c057262a89f1a7e02692f43ccc77047dc60b2285e1ccf21c39"}
+https://jiotvmblive.cdn.jio.com/bpk-tv/Asia_Cup_Tamil_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1757761351~exp=1757847751~acl=/*~hmac=d6b1633aba1e08c057262a89f1a7e02692f43ccc77047dc60b2285e1ccf21c39
+
 #EXTINF:-1 tvg-id="1111" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_Movies_HD.png",Star Maa Movies HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=6dff9a2c741754c1b75312c53bc83d92:b75a65f46065ee70de75a88fed692846
