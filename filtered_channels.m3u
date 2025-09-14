@@ -10,6 +10,12 @@
 #EXTHTTP:{"cookie":"__hdnea__=st=1757847741~exp=1757934141~acl=/*~hmac=07663b9128344346d4cfad2f0ece0a83f8d232a4b46e912505b787ccea651427
 https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_Movies_HD_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1757847741~exp=1757934141~acl=/*~hmac=07663b9128344346d4cfad2f0ece0a83f8d232a4b46e912505b787ccea651427
 
+#EXTINF:-1 tvg-id="asiatelugu" group-title="Kids" tvg-logo="",Asia Cup Telugu 
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=b4efe4dcb98058a2a19d756a4a1f7402:b0018aea46a003d5ddc95487b875a336
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
+#EXTHTTP:{"cookie":"__hdnea__=st=1757847741~exp=1757934141~acl=/*~hmac=07663b9128344346d4cfad2f0ece0a83f8d232a4b46e912505b787ccea651427
+https://jiotvmblive.cdn.jio.com/bpk-tv/Asia_Cup_Telugu_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1757847741~exp=1757934141~acl=/*~hmac=07663b9128344346d4cfad2f0ece0a83f8d232a4b46e912505b787ccea651427
 
 #EXTINF:-1 tvg-id="1112" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_HD.png",Star Maa HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
