@@ -3,6 +3,13 @@
 #EXTM3U x-tvg-url="https://www.tsepg.cf/epg.xml.gz"
 #EXTM3U x-tvg-url="https://avkb.short.gy/tsepg.xml.gz"
 
+#EXTINF:-1 tvg-id="asiahindi" group-title="Kids" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Asia_Cup_Hindi.png",Asia Cup Telugu 
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=31b13c6f241055aaa965263f3115e684:61f0cbc9599925a7be93d45e30b8ebe9
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
+#EXTHTTP:{"cookie":"__hdnea__=st=1757810664~exp=1757897064~acl=/*~hmac=894c80e2f9b8e04ca10cdfd0849d92176b767504e546938836c78bccab4e77f6"}
+https://jiotvmblive.cdn.jio.com/bpk-tv/Asia_Cup_Hindi_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1757810664~exp=1757897064~acl=/*~hmac=894c80e2f9b8e04ca10cdfd0849d92176b767504e546938836c78bccab4e77f6
+
 #EXTINF:-1 tvg-id="asiatelugu" group-title="Kids" tvg-logo="",Asia Cup Telugu 
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=b4efe4dcb98058a2a19d756a4a1f7402:b0018aea46a003d5ddc95487b875a336
