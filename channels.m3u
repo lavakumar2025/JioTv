@@ -3,7 +3,7 @@
 #EXTM3U x-tvg-url="https://www.tsepg.cf/epg.xml.gz"
 #EXTM3U x-tvg-url="https://avkb.short.gy/tsepg.xml.gz"
 
-#EXTINF:-1 tvg-id="asiahindi" group-title="Kids" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Asia_Cup_Hindi.png",Asia Cup Telugu 
+#EXTINF:-1 tvg-id="asiahindi" group-title="Kids" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Asia_Cup_Hindi.png",Asia Cup Hindi 
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=31b13c6f241055aaa965263f3115e684:61f0cbc9599925a7be93d45e30b8ebe9
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
