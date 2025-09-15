@@ -10,6 +10,13 @@
 #EXTHTTP:{"cookie":"__hdnea__=st=1757942041~exp=1758028441~acl=/*~hmac=2f3b33a6f88096c6865e63b9d99b57b0bc971d9140d8d8fa36f24d004f729cfb
 https://jiotvmblive.cdn.jio.com/bpk-tv/Maa_Movies_HD_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1757942041~exp=1758028441~acl=/*~hmac=2f3b33a6f88096c6865e63b9d99b57b0bc971d9140d8d8fa36f24d004f729cfb
 
+#EXTINF:-1 tvg-id="sonylivsports" group-title="Kids" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Sony_LIV_Sports.png",Asia Cup Telugu 
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=be4867b7865a5a6497d1b4fd49b33228:23ec293e6fa70ceac1b77899b52992d6
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
+#EXTHTTP:{"cookie":"__hdnea__=st=1757944787~exp=1758031187~acl=/*~hmac=c1ef0c35023a5e8ec360a0b7c3c9f391dd39cb32924785e66c2be7fa9f789362"}
+https://jiotvmblive.cdn.jio.com/bpk-tv/Sony_LIV_Sports_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1757944787~exp=1758031187~acl=/*~hmac=c1ef0c35023a5e8ec360a0b7c3c9f391dd39cb32924785e66c2be7fa9f789362
+
 #EXTINF:-1 tvg-id="asiatelugu" group-title="Kids" tvg-logo="",Asia Cup Telugu 
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=b4efe4dcb98058a2a19d756a4a1f7402:b0018aea46a003d5ddc95487b875a336
