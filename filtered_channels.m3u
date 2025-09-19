@@ -21,8 +21,8 @@ https://jiotvpllive.cdn.jio.com/bpk-tv/Sony_LIV_Sports_MOB/WDVLive/index.mpd?%7C
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=b4efe4dcb98058a2a19d756a4a1f7402:b0018aea46a003d5ddc95487b875a336
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
-#EXTHTTP:{"cookie":"__hdnea__=st=1758261610~exp=1758348010~acl=/*~hmac=a097998bbcf06a6ee1222231721dd38633bd5bf539b26adbeee4da0ba236dabd
-https://jiotvbpkmob.cdn.jio.com/bpk-tv/Asia_Cup_Telugu_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1758261610~exp=1758348010~acl=/*~hmac=a097998bbcf06a6ee1222231721dd38633bd5bf539b26adbeee4da0ba236dabd
+#EXTHTTP:{"cookie":"__hdnea__=st=1758280064~exp=1758366464~acl=/*~hmac=f828a4bfd62980ef6d3ebd9faf3668b0b73ac7da3322f0c65a8374a96179a356
+https://jiotvbpkmob.cdn.jio.com/bpk-tv/Asia_Cup_Telugu_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1758280064~exp=1758366464~acl=/*~hmac=f828a4bfd62980ef6d3ebd9faf3668b0b73ac7da3322f0c65a8374a96179a356
 
 #EXTINF:-1 tvg-id="1112" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_HD.png",Star Maa HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
