@@ -10,7 +10,7 @@
 #EXTHTTP:{"cookie":"__hdnea__=st=1758242531~exp=1758328931~acl=/*~hmac=76f0d197450721812dbded07072f78a638ed6350725991594796438490446b91
 https://jiotvpllive.cdn.jio.com/bpk-tv/Maa_Movies_HD_BTS/output/index.mpd?%7Ccookie=__hdnea__=st=1758242531~exp=1758328931~acl=/*~hmac=76f0d197450721812dbded07072f78a638ed6350725991594796438490446b91
 
-#EXTINF:-1 tvg-id="sonylivsports" group-title="Kids" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Sony_LIV_Sports.png",Asia Cup Telugu 
+#EXTINF:-1 tvg-id="sonylivsports" group-title="Kids" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Sony_LIV_Sports.png",Sony Liv Sports
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=be4867b7865a5a6497d1b4fd49b33228:23ec293e6fa70ceac1b77899b52992d6
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
@@ -22,7 +22,7 @@ https://jiotvpllive.cdn.jio.com/bpk-tv/Sony_LIV_Sports_MOB/WDVLive/index.mpd?%7C
 #KODIPROP:inputstream.adaptive.license_key=b4efe4dcb98058a2a19d756a4a1f7402:b0018aea46a003d5ddc95487b875a336
 #EXTVLCOPT:http-user-agent=plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6 YGX/69.69.69.69
 #EXTHTTP:{"cookie":"__hdnea__=st=1758242531~exp=1758328931~acl=/*~hmac=76f0d197450721812dbded07072f78a638ed6350725991594796438490446b91
-https://jiotvpllive.cdn.jio.com/bpk-tv/Asia_Cup_Telugu_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1758242531~exp=1758328931~acl=/*~hmac=76f0d197450721812dbded07072f78a638ed6350725991594796438490446b91
+https://jiotvbpkmob.cdn.jio.com/bpk-tv/Asia_Cup_Telugu_MOB/WDVLive/index.mpd?%7Ccookie=__hdnea__=st=1758242531~exp=1758328931~acl=/*~hmac=76f0d197450721812dbded07072f78a638ed6350725991594796438490446b91
 
 #EXTINF:-1 tvg-id="1112" group-title="Jiostar" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_HD.png",Star Maa HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
